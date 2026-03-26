@@ -1,0 +1,86 @@
+import { Accordion } from '@ark-ui/react/accordion'
+import { NavLink, Outlet } from 'react-router-dom'
+import PortalHeader from './PortalHeader'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined'
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
+import LocalHospitalOutlinedIcon from '@mui/icons-material/LocalHospitalOutlined'
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined'
+import ContactPhoneOutlinedIcon from '@mui/icons-material/ContactPhoneOutlined'
+import PolicyOutlinedIcon from '@mui/icons-material/PolicyOutlined'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+
+const navLinkClass = ({ isActive }) =>
+  `flex items-center gap-2 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
+    isActive
+      ? 'bg-blue-50 text-blue-700 font-medium'
+      : 'text-gray-600 hover:bg-gray-100'
+  }`
+
+export default function PortalLayout() {
+  return (
+    <div className="flex flex-col h-screen bg-gray-50 font-sans">
+      <PortalHeader />
+
+      <div className="flex flex-1 overflow-hidden">
+      {/* Sidebar */}
+      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col py-4 shrink-0">
+
+        <nav className="flex-1 px-2 space-y-1">
+          {/* Group Policy Contracts — collapsible */}
+          <Accordion.Root defaultValue={['group-policy']} collapsible>
+            <Accordion.Item value="group-policy">
+              <Accordion.ItemTrigger className="flex items-center justify-between w-full px-3 py-2 rounded text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer text-left">
+                <span className="flex items-center gap-2">
+                  <PolicyOutlinedIcon fontSize="small" className="text-gray-500" />
+                  Group Policy Contracts
+                </span>
+                <Accordion.ItemIndicator>
+                  <ChevronRightIcon
+                    fontSize="small"
+                    className="text-gray-400 transition-transform duration-200 [[data-state=open]_&]:rotate-90"
+                  />
+                </Accordion.ItemIndicator>
+              </Accordion.ItemTrigger>
+
+              <Accordion.ItemContent className="pl-4 mt-1 space-y-1">
+                <NavLink to="/portal/contracts" className={navLinkClass}>
+                  <ArticleOutlinedIcon fontSize="small" />
+                  Contracts
+                </NavLink>
+                <NavLink to="/portal/plans" className={navLinkClass}>
+                  <ListAltOutlinedIcon fontSize="small" />
+                  Plans
+                </NavLink>
+              </Accordion.ItemContent>
+            </Accordion.Item>
+          </Accordion.Root>
+
+          {/* Top-level nav items */}
+          <NavLink to="/portal/members" className={navLinkClass}>
+            <PeopleAltOutlinedIcon fontSize="small" />
+            Members
+          </NavLink>
+          <NavLink to="/portal/claims" className={navLinkClass}>
+            <LocalHospitalOutlinedIcon fontSize="small" />
+            Claims
+          </NavLink>
+          <NavLink to="/portal/analytics" className={navLinkClass}>
+            <BarChartOutlinedIcon fontSize="small" />
+            Analytics
+          </NavLink>
+          <NavLink to="/portal/contacts" className={navLinkClass}>
+            <ContactPhoneOutlinedIcon fontSize="small" />
+            Contacts
+          </NavLink>
+        </nav>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-auto p-8">
+        <Outlet />
+      </main>
+      </div>
+    </div>
+  )
+}
