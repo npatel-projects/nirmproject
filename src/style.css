@@ -1,9 +1,49 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
+/* ── Design tokens (Tailwind v4 @theme) ───────────────────────────────────── */
+@theme {
+  /* Brand */
+  --color-brand-primary:        #00853e;
+  --color-brand-primary-dark:   #00602c;
+  --color-brand-accent:         #ffcd00;
+
+  /* Navigation */
+  --color-nav-active-bg:        #eff6ff;   /* blue-50  */
+  --color-nav-active-text:      #1d4ed8;   /* blue-700 */
+  --color-nav-hover-bg:         #f3f4f6;   /* gray-100 */
+  --color-nav-text:             #4b5563;   /* gray-600 */
+
+  /* Surface */
+  --color-surface:              #ffffff;
+  --color-surface-subtle:       #f9fafb;   /* gray-50  */
+  --color-border:               #e5e7eb;   /* gray-200 */
+  --color-border-subtle:        #f3f4f6;   /* gray-100 */
+
+  /* Text */
+  --color-text-primary:         #111827;   /* gray-900 */
+  --color-text-secondary:       #6b7280;   /* gray-500 */
+  --color-text-muted:           #9ca3af;   /* gray-400 */
+
+  /* Link / interactive */
+  --color-link:                 #2563eb;   /* blue-600 */
+  --color-link-hover:           #1e40af;   /* blue-800 */
+
+  /* Status */
+  --color-success:              #16a34a;
+  --color-warning:              #d97706;
+  --color-error:                #dc2626;
+}
+
 * { font-family: 'Open Sans', sans-serif; }
+
+/* Ark UI Tabs active indicator */
+[data-scope="tabs"][data-part="trigger"][data-selected] {
+  border-bottom-color: var(--color-brand-primary);
+  color: var(--color-text-primary);
+}
 
 body {
   background: #f4f6f8;
-  min-height: 100vh;
+  overflow: hidden;
 }

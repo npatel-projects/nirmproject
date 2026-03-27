@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { Button } from '@mui/material'
 
 function ContractCard({ contract }) {
+  const navigate = useNavigate()
   const plans = contract.plan ?? []
 
   return (
@@ -19,9 +22,13 @@ function ContractCard({ contract }) {
             })}
           </p>
         </div>
-        <button className="text-sm text-gray-400 hover:text-blue-600 transition-colors">
+        <Button
+          variant="text"
+          size="small"
+          onClick={() => navigate(`/portal/contracts/${contract.contract_id}`)}
+        >
           View Details
-        </button>
+        </Button>
       </div>
 
       {/* Card body */}
@@ -94,7 +101,7 @@ export default function ContractsPage() {
       {error && <p className="text-sm text-red-500">Error: {error}</p>}
 
       {!loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {contracts.map((contract) => (
             <ContractCard key={contract.contract_id} contract={contract} />
           ))}

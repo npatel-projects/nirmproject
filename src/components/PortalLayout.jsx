@@ -1,6 +1,8 @@
 import { Accordion } from '@ark-ui/react/accordion'
 import { NavLink, Outlet } from 'react-router-dom'
 import PortalHeader from './PortalHeader'
+import PortalFooter from './PortalFooter'
+
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
@@ -13,8 +15,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
     isActive
-      ? 'bg-blue-50 text-blue-700 font-medium'
-      : 'text-gray-600 hover:bg-gray-100'
+      ? 'bg-nav-active-bg text-nav-active-text font-medium'
+      : 'text-nav-text hover:bg-nav-hover-bg'
   }`
 
 export default function PortalLayout() {
@@ -24,7 +26,7 @@ export default function PortalLayout() {
 
       <div className="flex flex-1 overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col py-4 shrink-0">
+      <aside className="w-14 md:w-56 bg-white border-r border-gray-200 flex flex-col py-4 shrink-0 transition-all duration-200">
 
         <nav className="flex-1 px-2 space-y-1">
           {/* Group Policy Contracts — collapsible */}
@@ -32,10 +34,10 @@ export default function PortalLayout() {
             <Accordion.Item value="group-policy">
               <Accordion.ItemTrigger className="flex items-center justify-between w-full px-3 py-2 rounded text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer text-left">
                 <span className="flex items-center gap-2">
-                  <PolicyOutlinedIcon fontSize="small" className="text-gray-500" />
-                  Group Policy Contracts
+                  <PolicyOutlinedIcon fontSize="small" className="text-gray-500 shrink-0" />
+                  <span className="hidden md:inline">Group Policy Contracts</span>
                 </span>
-                <Accordion.ItemIndicator>
+                <Accordion.ItemIndicator className="hidden md:flex">
                   <ChevronRightIcon
                     fontSize="small"
                     className="text-gray-400 transition-transform duration-200 [[data-state=open]_&]:rotate-90"
@@ -43,14 +45,14 @@ export default function PortalLayout() {
                 </Accordion.ItemIndicator>
               </Accordion.ItemTrigger>
 
-              <Accordion.ItemContent className="pl-4 mt-1 space-y-1">
+              <Accordion.ItemContent className="pl-4 mt-1 space-y-1 hidden md:block">
                 <NavLink to="/portal/contracts" className={navLinkClass}>
-                  <ArticleOutlinedIcon fontSize="small" />
-                  Contracts
+                  <ArticleOutlinedIcon fontSize="small" className="shrink-0" />
+                  <span className="hidden md:inline">Contracts</span>
                 </NavLink>
                 <NavLink to="/portal/plans" className={navLinkClass}>
-                  <ListAltOutlinedIcon fontSize="small" />
-                  Plans
+                  <ListAltOutlinedIcon fontSize="small" className="shrink-0" />
+                  <span className="hidden md:inline">Plans</span>
                 </NavLink>
               </Accordion.ItemContent>
             </Accordion.Item>
@@ -58,27 +60,32 @@ export default function PortalLayout() {
 
           {/* Top-level nav items */}
           <NavLink to="/portal/members" className={navLinkClass}>
-            <PeopleAltOutlinedIcon fontSize="small" />
-            Members
+            <PeopleAltOutlinedIcon fontSize="small" className="shrink-0" />
+            <span className="hidden md:inline">Members</span>
           </NavLink>
           <NavLink to="/portal/claims" className={navLinkClass}>
-            <LocalHospitalOutlinedIcon fontSize="small" />
-            Claims
+            <LocalHospitalOutlinedIcon fontSize="small" className="shrink-0" />
+            <span className="hidden md:inline">Claims</span>
           </NavLink>
           <NavLink to="/portal/analytics" className={navLinkClass}>
-            <BarChartOutlinedIcon fontSize="small" />
-            Analytics
+            <BarChartOutlinedIcon fontSize="small" className="shrink-0" />
+            <span className="hidden md:inline">Analytics</span>
           </NavLink>
           <NavLink to="/portal/contacts" className={navLinkClass}>
-            <ContactPhoneOutlinedIcon fontSize="small" />
-            Contacts
+            <ContactPhoneOutlinedIcon fontSize="small" className="shrink-0" />
+            <span className="hidden md:inline">Contacts</span>
           </NavLink>
         </nav>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto p-8">
-        <Outlet />
+      <main className="flex-1 overflow-auto">
+        <div className="min-h-full flex flex-col p-4 md:p-6 lg:p-10">
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <PortalFooter />
+        </div>
       </main>
       </div>
     </div>
