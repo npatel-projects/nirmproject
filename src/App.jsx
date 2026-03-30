@@ -10,7 +10,10 @@ import EnrollmentPage from './pages/portal/EnrollmentPage'
 import ClaimsPage from './pages/portal/ClaimsPage'
 import ClaimDetailPage from './pages/portal/ClaimDetailPage'
 import CreateClaimPage from './pages/portal/CreateClaimPage'
+import TestPage from './pages/portal/TestPage'
 import PersonaGuard from './components/PersonaGuard'
+import AuthGuard from './components/AuthGuard'
+import LoginPage from './pages/LoginPage'
 import { usePersona } from './context/PersonaContext'
 
 function DefaultRedirect() {
@@ -22,8 +25,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<DefaultRedirect />} />
-        <Route path="/portal" element={<PortalLayout />}>
+        <Route path="/portal" element={<AuthGuard><PortalLayout /></AuthGuard>}>
           <Route index element={<DefaultRedirect />} />
           <Route path="contracts" element={<PersonaGuard route="contracts"><ContractsPage /></PersonaGuard>} />
           <Route path="contracts/:contractId" element={<PersonaGuard route="contracts"><ContractDetailPage /></PersonaGuard>} />
@@ -35,6 +39,7 @@ export default function App() {
           <Route path="claims" element={<PersonaGuard route="claims"><ClaimsPage /></PersonaGuard>} />
           <Route path="claims/new" element={<PersonaGuard route="claims"><CreateClaimPage /></PersonaGuard>} />
           <Route path="claims/:claimId" element={<PersonaGuard route="claims"><ClaimDetailPage /></PersonaGuard>} />
+          <Route path="test" element={<TestPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

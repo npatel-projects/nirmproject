@@ -662,14 +662,14 @@ export default function CreateClaimPage() {
   return (
     <div>
       {step !== 'success' && (
-        <button
-          className="flex items-center gap-1 text-sm mb-6 transition-opacity hover:opacity-70"
-          style={{ color: colors.link }}
+        <Button
+          variant="text"
+          startIcon={<ArrowBackIcon />}
           onClick={handleBack}
+          sx={{ mb: 3, pl: 0 }}
         >
-          <ArrowBackIcon fontSize="small" />
-          {step === 'type' ? 'Back to claims' : 'Back'}
-        </button>
+          {step === 'type' ? 'Back to Claims' : 'Back'}
+        </Button>
       )}
 
       {step === 'type' && <TypeSelector onSelect={handleSelectTile} />}

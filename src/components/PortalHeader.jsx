@@ -50,15 +50,28 @@ export default function PortalHeader() {
       setEntities((data ?? []).map((s) => ({ id: s.sponsor_id, label: s.sponsor_name })))
     } else if (key === 'MEMBER') {
       const { data } = await supabase
-        .from('member')
-        .select('member_id, member_number, member_status, employee_id, employee(first_name, last_name)')
-        .eq('member_status', 'ACTIVE')
+        .from('employee')
+        .select('employee_id, first_name, last_name, member(member_id, member_number, member_status)')
+        .eq('employment_status', 'ACTIVE')
+        .order('last_name')
+
       setEntities(
-        (data ?? []).map((m) => ({
-          id: m.member_id,
-          label: `${m.employee.first_name} ${m.employee.last_name} (${m.member_number})`,
-          employeeId: m.employee_id,
-        }))
+        (data ?? []).map((e) => {
+          const activeMember = (e.member ?? []).find((m) => m.member_status === 'ACTIVE')
+          return activeMember
+            ? {
+                id: activeMember.member_id,
+                label: `${e.first_name} ${e.last_name} (${activeMember.member_number})`,
+                employeeId: e.employee_id,
+                enrolled: true,
+              }
+            : {
+                id: e.employee_id,
+                label: `${e.first_name} ${e.last_name}`,
+                employeeId: e.employee_id,
+                enrolled: false,
+              }
+        })
       )
     }
 
@@ -69,8 +82,12 @@ export default function PortalHeader() {
     switchTo(key, entity)
     setMenuOpen(false)
     setExpandedPersona(null)
-    if (key === 'MEMBER' && entity.employeeId) {
-      navigate(`/portal/members/${entity.employeeId}`)
+    if (key === 'MEMBER') {
+      if (entity.enrolled === false) {
+        navigate('/portal') // self-enrollment landing — TBD
+      } else {
+        navigate(`/portal/members/${entity.employeeId}`)
+      }
     } else {
       navigate(PERSONAS[key].defaultRoute)
     }
@@ -208,13 +225,16 @@ export default function PortalHeader() {
                                 onClick={() => handleSelectEntity(p.key, entity)}
                               >
                                 {isSelected ? (
-                                  <CheckIcon
-                                    style={{ color: colors.brandPrimary, fontSize: 14 }}
-                                  />
+                                  <CheckIcon style={{ color: colors.brandPrimary, fontSize: 14 }} />
                                 ) : (
                                   <span className="inline-block w-3.5" />
                                 )}
-                                <span className="text-gray-800 truncate">{entity.label}</span>
+                                <span className="text-gray-800 truncate flex-1 min-w-0">{entity.label}</span>
+                                {p.key === 'MEMBER' && entity.enrolled === false && (
+                                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 shrink-0">
+                                    Not Enrolled
+                                  </span>
+                                )}
                               </button>
                             )
                           })

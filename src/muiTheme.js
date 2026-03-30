@@ -15,22 +15,27 @@ export const muiTheme = createTheme({
   typography: {
     fontFamily: 'Open Sans, sans-serif',
     button: {
-      textTransform: 'none',
       fontWeight: 600,
     },
   },
   components: {
     MuiButton: {
+      defaultProps: {
+        size: 'medium',
+      },
       styleOverrides: {
         containedPrimary: {
           borderRadius: '9999px',
+          textTransform: 'uppercase',
           '&:hover': { backgroundColor: colors.brandPrimaryDark },
         },
         outlinedPrimary: {
           borderRadius: '9999px',
+          textTransform: 'uppercase',
         },
         textPrimary: {
           borderRadius: '4px',
+          textTransform: 'none',
         },
       },
     },

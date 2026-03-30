@@ -425,14 +425,7 @@ export default function ClaimsPage() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            size="small"
             onClick={() => navigate('/portal/claims/new')}
-            sx={{
-              borderRadius: 99,
-              textTransform: 'none',
-              fontWeight: 600,
-              backgroundColor: colors.brandPrimary,
-            }}
           >
             Create Claim
           </Button>

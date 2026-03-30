@@ -94,7 +94,7 @@ export default function ContractDetailPage() {
         onClick={() => navigate('/portal/contracts')}
         sx={{ mb: 2, pl: 0 }}
       >
-        Back to group policy contracts
+        Back to Group Policy Contracts
       </Button>
 
       {/* Page header */}
