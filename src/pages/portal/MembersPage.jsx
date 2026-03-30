@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
 import { Select, createListCollection } from '@ark-ui/react/select'
@@ -34,6 +34,10 @@ function deriveEmployee(emp) {
   const planName = isEnrolled
     ? (activeMember?.plan?.plan_name ?? '—')
     : (emp.employee_plan_assignment?.[0]?.plan?.plan_name ?? '—')
+  // Unified plan ID: enrolled members use their member plan, others use their assignment plan
+  const planId = isEnrolled
+    ? (activeMember?.plan_id ?? activeMember?.plan?.plan_id ?? null)
+    : (emp.employee_plan_assignment?.[0]?.plan?.plan_id ?? null)
   const assignment = emp.employee_plan_assignment?.[0] ?? null
   const division = assignment?.division_code ?? '—'
   const classCode = assignment?.class_code ?? '—'
@@ -44,6 +48,7 @@ function deriveEmployee(emp) {
     isEnrolled,
     memberNumber,
     planName,
+    planId,
     division,
     classCode,
     assignmentStatus,
@@ -859,6 +864,7 @@ function AddIndividualForm({ plans, onSuccess, sponsorId }) {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function MembersPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { sponsorId } = usePersona()
   const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(true)
@@ -937,6 +943,13 @@ export default function MembersPage() {
     fetchPlans()
   }, [])
 
+  // Apply ?planId= URL param as plan filter once the plans list has loaded
+  useEffect(() => {
+    const planId = searchParams.get('planId')
+    if (!planId || plans.length === 0) return
+    if (plans.some((p) => p.plan_id === planId)) setPlanFilter(planId)
+  }, [plans, searchParams])
+
   // ─── Summary counts ─────────────────────────────────────────────────────────
   const totalCount = employees.length
   const enrolledCount = employees.filter((e) => e.isEnrolled).length
@@ -961,21 +974,13 @@ export default function MembersPage() {
   })
 
   const planCollection = useMemo(() => {
-    const uniquePlans = Array.from(
-      new Map(
-        employees
-          .map((e) => e.employee_plan_assignment?.[0]?.plan)
-          .filter(Boolean)
-          .map((p) => [p.plan_id, p])
-      ).values()
-    )
     return createListCollection({
       items: [
         { label: 'All Plans', value: 'all' },
-        ...uniquePlans.map((p) => ({ label: p.plan_name, value: p.plan_id })),
+        ...plans.map((p) => ({ label: p.plan_name, value: p.plan_id })),
       ],
     })
-  }, [employees])
+  }, [plans])
 
   const groupCollection = useMemo(() => {
     const uniqueGroups = [
@@ -1013,8 +1018,7 @@ export default function MembersPage() {
 
       // Plan filter
       if (planFilter !== 'all') {
-        const assignedPlanId = emp.employee_plan_assignment?.[0]?.plan?.plan_id
-        if (assignedPlanId !== planFilter) return false
+        if (emp.planId !== planFilter) return false
       }
 
       // Group filter

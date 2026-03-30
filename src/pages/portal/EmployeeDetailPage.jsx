@@ -15,6 +15,7 @@ import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined'
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined'
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'
 import { colors } from '../../theme'
+import { usePersona } from '../../context/PersonaContext'
 import { generateMemberCertificate } from '../../lib/generateMemberCertificate'
 
 function formatDate(dateStr) {
@@ -352,6 +353,7 @@ const ALL_TABS = [
 export default function EmployeeDetailPage() {
   const { employeeId } = useParams()
   const navigate = useNavigate()
+  const { personaKey } = usePersona()
 
   const [emp, setEmp] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -421,15 +423,17 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="w-full">
-      {/* Back */}
-      <Button
-        variant="text"
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate('/portal/members')}
-        sx={{ mb: 1, pl: 0 }}
-      >
-        Back to Members
-      </Button>
+      {/* Back — only shown to sponsor admins */}
+      {personaKey !== 'MEMBER' && (
+        <Button
+          variant="text"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/portal/members')}
+          sx={{ mb: 1, pl: 0 }}
+        >
+          Back to Members
+        </Button>
+      )}
 
       {/* Header row */}
       <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
@@ -514,25 +518,25 @@ export default function EmployeeDetailPage() {
                   icon={<PeopleOutlinedIcon fontSize="small" />}
                   title="Update Beneficiaries"
                   description="Add or change beneficiary information"
-                  onClick={() => alert('Update Beneficiaries (not yet wired).')}
+                  onClick={() => navigate('/portal/requests/new?type=BENEFICIARY_CHANGE')}
                 />
                 <QuickActionCard
                   icon={<SwapHorizOutlinedIcon fontSize="small" />}
                   title="Change Coverage"
                   description="Modify existing coverage elections"
-                  onClick={() => alert('Change Coverage (not yet wired).')}
+                  onClick={() => navigate('/portal/requests/new?type=COVERAGE_CHANGE')}
                 />
                 <QuickActionCard
                   icon={<PersonAddOutlinedIcon fontSize="small" />}
                   title="Add / Remove Dependent"
                   description="Manage dependents on the plan"
-                  onClick={() => alert('Add / Remove Dependent (not yet wired).')}
+                  onClick={() => navigate('/portal/requests/new?type=ADD_DEPENDENT')}
                 />
                 <QuickActionCard
                   icon={<EventOutlinedIcon fontSize="small" />}
                   title="Report Life Event"
                   description="Marriage, birth, retirement, etc."
-                  onClick={() => alert('Report Life Event (not yet wired).')}
+                  onClick={() => navigate('/portal/requests/new?type=LIFE_EVENT')}
                 />
               </div>
             </div>

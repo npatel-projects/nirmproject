@@ -12,6 +12,9 @@ import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined'
 import ContactPhoneOutlinedIcon from '@mui/icons-material/ContactPhoneOutlined'
 import PolicyOutlinedIcon from '@mui/icons-material/PolicyOutlined'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
@@ -21,7 +24,7 @@ const navLinkClass = ({ isActive }) =>
   }`
 
 export default function PortalLayout() {
-  const { can } = usePersona()
+  const { can, activeEntity } = usePersona()
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-sans">
       <PortalHeader />
@@ -61,6 +64,15 @@ export default function PortalLayout() {
             </Accordion.Root>
           )}
 
+          {can('my-benefits') && (
+            <NavLink
+              to={activeEntity?.employeeId ? `/portal/members/${activeEntity.employeeId}` : '/portal/claims'}
+              className={navLinkClass}
+            >
+              <AccountCircleOutlinedIcon fontSize="small" className="shrink-0" />
+              <span className="hidden md:inline">My Benefits</span>
+            </NavLink>
+          )}
           {can('members') && (
             <NavLink to="/portal/members" className={navLinkClass}>
               <PeopleAltOutlinedIcon fontSize="small" className="shrink-0" />
@@ -77,6 +89,18 @@ export default function PortalLayout() {
             <NavLink to="/portal/analytics" className={navLinkClass}>
               <BarChartOutlinedIcon fontSize="small" className="shrink-0" />
               <span className="hidden md:inline">Analytics</span>
+            </NavLink>
+          )}
+          {can('requests') && (
+            <NavLink to="/portal/requests" className={navLinkClass}>
+              <AssignmentOutlinedIcon fontSize="small" className="shrink-0" />
+              <span className="hidden md:inline">Change Requests</span>
+            </NavLink>
+          )}
+          {can('my-card') && (
+            <NavLink to="/portal/my-card" className={navLinkClass}>
+              <CreditCardOutlinedIcon fontSize="small" className="shrink-0" />
+              <span className="hidden md:inline">My Card</span>
             </NavLink>
           )}
           {can('contacts') && (

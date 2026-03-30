@@ -113,9 +113,9 @@ export default function PortalHeader() {
         </button>
 
         {/* Notifications */}
-        <button className="hover:opacity-80 transition-opacity">
+        <button className="hover:opacity-80 transition-opacity" onClick={() => navigate('/portal/messages')}>
           <Badge
-            badgeContent={1}
+            badgeContent={2}
             color="error"
             sx={{ '& .MuiBadge-badge': { fontSize: 10, minWidth: 16, height: 16 } }}
           >
