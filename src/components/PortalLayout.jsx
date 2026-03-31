@@ -25,7 +25,7 @@ const navLinkClass = ({ isActive }) =>
   }`
 
 export default function PortalLayout() {
-  const { can, activeEntity } = usePersona()
+  const { can, activeEntity, isEnrolled } = usePersona()
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-sans">
       <PortalHeader />
@@ -80,7 +80,7 @@ export default function PortalLayout() {
               <span className="hidden md:inline">Members</span>
             </NavLink>
           )}
-          {can('claims') && (
+          {can('claims') && isEnrolled && (
             <NavLink to="/portal/claims" className={navLinkClass}>
               <LocalHospitalOutlinedIcon fontSize="small" className="shrink-0" />
               <span className="hidden md:inline">Claims</span>
@@ -92,13 +92,13 @@ export default function PortalLayout() {
               <span className="hidden md:inline">Analytics</span>
             </NavLink>
           )}
-          {can('requests') && (
+          {can('requests') && isEnrolled && (
             <NavLink to="/portal/requests" className={navLinkClass}>
               <AssignmentOutlinedIcon fontSize="small" className="shrink-0" />
               <span className="hidden md:inline">Change Requests</span>
             </NavLink>
           )}
-          {can('my-card') && (
+          {can('my-card') && isEnrolled && (
             <NavLink to="/portal/my-card" className={navLinkClass}>
               <CreditCardOutlinedIcon fontSize="small" className="shrink-0" />
               <span className="hidden md:inline">My Card</span>

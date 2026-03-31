@@ -43,8 +43,10 @@ function RequestRow({ req, onClick }) {
       className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
       onClick={onClick}
     >
-      <td className="px-5 py-3.5 text-sm text-gray-900 font-medium">
-        {req.request_number ?? '—'}
+      <td className="px-5 py-3.5 text-sm font-medium">
+        <button className="text-blue-600 hover:underline" onClick={onClick}>
+          {req.request_number ?? '—'}
+        </button>
       </td>
       <td className="px-5 py-3.5 text-sm text-gray-700">
         {REQUEST_TYPE_LABELS[req.request_type] ?? req.request_type}
@@ -60,28 +62,31 @@ function RequestRow({ req, onClick }) {
 
 function RequestTable({ rows, navigate }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-gray-100 bg-gray-50">
-            {['Request #', 'Type', 'Member', 'Submitted', 'Status'].map((h) => (
-              <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                {h}
-              </th>
+    <>
+      <p className="text-sm text-gray-500 mb-4">Click on a request number to see more details</p>
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50">
+              {['Request #', 'Type', 'Member', 'Submitted', 'Status'].map((h) => (
+                <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <RequestRow
+                key={r.change_request_id}
+                req={r}
+                onClick={() => navigate(`/portal/requests/${r.change_request_id}`)}
+              />
             ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <RequestRow
-              key={r.change_request_id}
-              req={r}
-              onClick={() => navigate(`/portal/requests/${r.change_request_id}`)}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }
 
@@ -131,11 +136,6 @@ export default function ChangeRequestsPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Change Request</h1>
-          {!loading && (
-            <p className="text-sm text-gray-500 mt-1">
-              {requests.length} {requests.length === 1 ? 'request' : 'requests'} total
-            </p>
-          )}
         </div>
         <Button
           variant="contained"

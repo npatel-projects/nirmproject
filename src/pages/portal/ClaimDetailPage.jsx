@@ -16,6 +16,7 @@ import MedicationOutlinedIcon from '@mui/icons-material/MedicationOutlined'
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined'
 import SpaOutlinedIcon from '@mui/icons-material/SpaOutlined'
 import { colors } from '../../theme'
+import { generateClaimStatement } from '../../lib/generateClaimStatement'
 
 // ─── Tile metadata (mirrors CreateClaimPage TILES) ────────────────────────────
 const TILE_META = {
@@ -227,7 +228,10 @@ export default function ClaimDetailPage() {
         {/* Actions */}
         {isCompleted && (
           <div className="flex gap-3 pt-2">
-            <Button variant="outlined" onClick={() => {/* TODO: download statement */}}>
+            <Button
+              variant="outlined"
+              onClick={() => generateClaimStatement({ claim, memberName, benefitName: claim.benefit?.benefit_name })}
+            >
               Download Statement
             </Button>
           </div>

@@ -64,6 +64,9 @@ export function PersonaProvider({ children }) {
     ? (activeEntity?.id ?? 'b0000001-0000-0000-0000-000000000001')
     : null
 
+  // For MEMBER persona: enrolled flag is set explicitly by PortalHeader when selecting an entity
+  const isEnrolled = personaKey !== 'MEMBER' || activeEntity?.enrolled !== false
+
   return (
     <PersonaContext.Provider value={{
       personaKey,
@@ -71,6 +74,7 @@ export function PersonaProvider({ children }) {
       activeEntity,
       sponsorId,
       brokerId,
+      isEnrolled,
       switchTo,
       can,
     }}>

@@ -286,6 +286,68 @@ function BeneficiariesDependentsTab({ memberId }) {
   )
 }
 
+// ─── Benefit type display config ──────────────────────────────────────────────
+const BENEFIT_META = {
+  LIFE:   { label: 'Life Insurance',              iconColor: '#be185d', iconBg: '#fdf2f8' },
+  STD:    { label: 'Short-Term Disability',        iconColor: '#7c3aed', iconBg: '#f5f3ff' },
+  LTD:    { label: 'Long-Term Disability',         iconColor: '#7c3aed', iconBg: '#f5f3ff' },
+  ADD:    { label: 'Accidental Death & Dismem.',   iconColor: '#b45309', iconBg: '#fffbeb' },
+  CI:     { label: 'Critical Illness',             iconColor: '#dc2626', iconBg: '#fef2f2' },
+  HEALTH: { label: 'Extended Health',              iconColor: '#0369a1', iconBg: '#f0f9ff' },
+  DENTAL: { label: 'Dental',                       iconColor: '#0891b2', iconBg: '#ecfeff' },
+  VISION: { label: 'Vision',                       iconColor: '#4f46e5', iconBg: '#eef2ff' },
+  DRUG:   { label: 'Prescription Drug',            iconColor: '#16a34a', iconBg: '#f0fdf4' },
+  HSA:    { label: 'Health Spending Account',      iconColor: '#0d9488', iconBg: '#f0fdfa' },
+  WSA:    { label: 'Wellness Spending Account',    iconColor: '#65a30d', iconBg: '#f7fee7' },
+}
+
+function coverageDescription(benefit) {
+  const { coverage_formula, flat_amount, nem_amount, max_amount } = benefit
+  const fmt = (v) => v != null ? formatCurrency(v) : null
+
+  if (coverage_formula === 'FLAT') return fmt(flat_amount) ?? 'Flat benefit'
+  if (coverage_formula === 'TIMES_SALARY') {
+    const mult = nem_amount != null ? `${nem_amount}× salary` : 'Multiple of salary'
+    return max_amount != null ? `${mult} (max ${fmt(max_amount)})` : mult
+  }
+  if (coverage_formula === 'PERCENT_SALARY') return nem_amount != null ? `${nem_amount}% of salary` : 'Percent of salary'
+  if (coverage_formula === 'PERCENT_EXPENSE') return 'Percent of eligible expenses'
+  if (coverage_formula === 'ACCOUNT_BALANCE') return max_amount != null ? `Up to ${fmt(max_amount)} per year` : 'Spending account balance'
+  return (coverage_formula ?? '').replace(/_/g, ' ')
+}
+
+function BenefitCard({ benefit }) {
+  const meta = BENEFIT_META[benefit.benefit_type] ?? { label: benefit.benefit_type, iconColor: '#6b7280', iconBg: '#f3f4f6' }
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: meta.iconBg }}>
+          <HealthAndSafetyOutlinedIcon style={{ color: meta.iconColor, fontSize: 18 }} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-gray-900 leading-snug">{benefit.benefit_name}</p>
+          <p className="text-xs text-gray-400">{meta.label}</p>
+        </div>
+      </div>
+
+      {/* Coverage amount — prominent */}
+      <div className="bg-gray-50 rounded-lg px-4 py-3">
+        <p className="text-xs text-gray-400 mb-0.5">Your Coverage</p>
+        <p className="text-base font-bold text-gray-900">{coverageDescription(benefit)}</p>
+      </div>
+
+      {/* Key details */}
+      {benefit.max_amount != null && (
+        <div className="text-xs">
+          <p className="text-gray-400">Maximum</p>
+          <p className="font-medium text-gray-700">{formatCurrency(benefit.max_amount)}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Plan Summary tab ─────────────────────────────────────────────────────────
 function PlanSummaryTab({ emp }) {
   const member = emp.member?.find((m) => m.member_status === 'ACTIVE') ?? null
@@ -324,47 +386,20 @@ function PlanSummaryTab({ emp }) {
           <InfoRow label="Effective Date" value={formatDate(member?.effective_date)} />
           <InfoRow label="Class" value={assignment?.class_code} />
           <InfoRow label="Division" value={assignment?.division_code} />
-          <InfoRow label="Assignment Status" value={assignment?.status} />
-          <InfoRow label="Member Status" value={member?.member_status} />
         </div>
       </SectionCard>
 
-      {/* Benefits table */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">Benefits</p>
-        </div>
+      {/* Benefits summary */}
+      <div className="mb-2">
+        <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">Your Benefits</p>
         {loadingBenefits ? (
-          <p className="text-sm text-gray-400 px-6 py-8">Loading benefits...</p>
+          <p className="text-sm text-gray-400">Loading benefits...</p>
         ) : benefits.length === 0 ? (
-          <p className="text-sm text-gray-400 px-6 py-8">No benefits configured for this plan.</p>
+          <p className="text-sm text-gray-400">No benefits configured for this plan.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Benefit</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Coverage Formula</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Flat Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">NEM</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Max</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Waiting (days)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {benefits.map((b, i) => (
-                <tr key={b.benefit_id} className={i < benefits.length - 1 ? 'border-b border-gray-100' : ''}>
-                  <td className="px-6 py-3 font-medium text-gray-900">{b.benefit_name}</td>
-                  <td className="px-6 py-3 text-gray-600">{b.benefit_type}</td>
-                  <td className="px-6 py-3 text-gray-600">{b.coverage_formula.replace('_', ' ')}</td>
-                  <td className="px-6 py-3 text-gray-600">{formatCurrency(b.flat_amount)}</td>
-                  <td className="px-6 py-3 text-gray-600">{formatCurrency(b.nem_amount)}</td>
-                  <td className="px-6 py-3 text-gray-600">{formatCurrency(b.max_amount)}</td>
-                  <td className="px-6 py-3 text-gray-600">{b.waiting_period_days ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {benefits.map((b) => <BenefitCard key={b.benefit_id} benefit={b} />)}
+          </div>
         )}
       </div>
     </>
