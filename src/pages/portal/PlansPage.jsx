@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Select, createListCollection } from '@ark-ui/react/select'
+import { createListCollection } from '@ark-ui/react/select'
 import { Pagination } from '@ark-ui/react/pagination'
 import SearchIcon from '@mui/icons-material/Search'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import FilterSelect from '../../components/FilterSelect'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { colors } from '../../theme'
 
@@ -69,10 +69,6 @@ export default function PlansPage() {
     ],
   })
 
-  const selectedContractLabel = contractFilter === 'all'
-    ? 'All Contracts'
-    : contracts.find(c => c.contract_id === contractFilter)?.contract_name ?? 'All Contracts'
-
   function handleContractChange(value) {
     if (value === 'all') {
       searchParams.delete('contractId')
@@ -102,33 +98,12 @@ export default function PlansPage() {
         </div>
 
         {/* Contract filter */}
-        <Select.Root
+        <FilterSelect
           collection={contractCollection}
-          value={[contractFilter]}
-          onValueChange={({ value }) => handleContractChange(value[0])}
-        >
-          <Select.Control>
-            <Select.Trigger className="flex items-center justify-between gap-2 px-3 py-2 text-sm border border-gray-300 rounded bg-white cursor-pointer hover:border-gray-400 focus:outline-none min-w-52">
-              <Select.ValueText className="text-gray-700 truncate">
-                {selectedContractLabel}
-              </Select.ValueText>
-              <ArrowDropDownIcon fontSize="small" className="text-gray-400 shrink-0" />
-            </Select.Trigger>
-          </Select.Control>
-          <Select.Positioner>
-            <Select.Content className="bg-white border border-gray-200 rounded shadow-lg z-50 min-w-52 py-1">
-              {contractCollection.items.map(item => (
-                <Select.Item
-                  key={item.value}
-                  item={item}
-                  className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50"
-                >
-                  <Select.ItemText>{item.label}</Select.ItemText>
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Positioner>
-        </Select.Root>
+          value={contractFilter}
+          onChange={handleContractChange}
+          placeholder="All Contracts"
+        />
       </div>
 
       {loading && <p className="text-sm text-gray-400">Loading plans...</p>}

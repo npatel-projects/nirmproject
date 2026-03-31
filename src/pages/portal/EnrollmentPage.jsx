@@ -2,20 +2,17 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
-import { Select, createListCollection } from '@ark-ui/react/select'
-import { RadioGroup } from '@ark-ui/react/radio-group'
 import { Button, Chip } from '@mui/material'
+import { FormField } from '../../components/DynamicForm'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import CheckIcon from '@mui/icons-material/Check'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined'
+import AssignmentLateOutlinedIcon from '@mui/icons-material/AssignmentLateOutlined'
+import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import { CircularProgress } from '@mui/material'
 import { colors } from '../../theme'
-
-// Options can be plain strings or { value, label } objects — normalise to { value, label }
-function normalizeOptions(options = []) {
-  return options.map((o) => typeof o === 'string' ? { value: o, label: o } : o)
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatDate(dateStr) {
@@ -35,137 +32,6 @@ function buildPrefill(emp) {
     phone_mobile:        emp.phone_mobile ?? '',
     province_state_code: emp.province_state_code ?? '',
   }
-}
-
-// ─── Individual field renderer ────────────────────────────────────────────────
-function FormField({ field, value, onChange, error }) {
-  const inputClass = `w-full px-3 py-2 text-sm border rounded focus:outline-none transition-colors ${
-    error ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-gray-500'
-  }`
-  const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
-
-  const label = (
-    <label className={labelClass} htmlFor={field.id}>
-      {field.label}
-      {field.required && <span className="text-red-500 ml-1">*</span>}
-    </label>
-  )
-
-  let control = null
-
-  if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'number') {
-    control = (
-      <input
-        id={field.id}
-        type={field.type === 'phone' ? 'tel' : field.type}
-        value={value ?? ''}
-        onChange={(e) => onChange(field.id, e.target.value)}
-        placeholder={field.placeholder ?? ''}
-        className={inputClass}
-      />
-    )
-  } else if (field.type === 'date') {
-    control = (
-      <input
-        id={field.id}
-        type="date"
-        value={value ?? ''}
-        onChange={(e) => onChange(field.id, e.target.value)}
-        className={inputClass}
-      />
-    )
-  } else if (field.type === 'textarea') {
-    control = (
-      <textarea
-        id={field.id}
-        value={value ?? ''}
-        onChange={(e) => onChange(field.id, e.target.value)}
-        placeholder={field.placeholder ?? ''}
-        rows={3}
-        className={`${inputClass} resize-none`}
-      />
-    )
-  } else if (field.type === 'select') {
-    const opts = normalizeOptions(field.options)
-    const collection = createListCollection({ items: opts, itemToValue: (o) => o.value, itemToString: (o) => o.label })
-    const selectedLabel = opts.find((o) => o.value === (value ?? ''))?.label ?? 'Select...'
-    control = (
-      <Select.Root
-        collection={collection}
-        value={value ? [value] : []}
-        onValueChange={({ value: v }) => onChange(field.id, v[0] ?? '')}
-      >
-        <Select.Control>
-          <Select.Trigger
-            className={`${inputClass} flex items-center justify-between cursor-pointer bg-white`}
-          >
-            <Select.ValueText placeholder="Select...">
-              {selectedLabel}
-            </Select.ValueText>
-            <KeyboardArrowDownIcon style={{ fontSize: '1.1rem', color: '#6b7280' }} />
-          </Select.Trigger>
-        </Select.Control>
-        <Select.Positioner style={{ zIndex: 50 }}>
-          <Select.Content className="bg-white border border-gray-200 rounded shadow-lg py-1 min-w-[160px]">
-            {opts.map((opt) => (
-              <Select.Item
-                key={opt.value}
-                item={opt}
-                className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50"
-              >
-                <Select.ItemText>{opt.label}</Select.ItemText>
-                <Select.ItemIndicator>
-                  <CheckIcon style={{ fontSize: '0.9rem', color: '#15803d' }} />
-                </Select.ItemIndicator>
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Positioner>
-      </Select.Root>
-    )
-  } else if (field.type === 'radio') {
-    const opts = normalizeOptions(field.options)
-    control = (
-      <RadioGroup.Root
-        value={value ?? ''}
-        onValueChange={({ value: v }) => onChange(field.id, v)}
-        className="flex flex-wrap gap-3 mt-1"
-      >
-        {opts.map((opt) => (
-          <RadioGroup.Item key={opt.value} value={opt.value} className="flex items-center gap-2 cursor-pointer">
-            <RadioGroup.ItemControl className="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center data-[state=checked]:border-green-700 data-[state=checked]:bg-green-700" />
-            <RadioGroup.ItemText className="text-sm text-gray-700">{opt.label}</RadioGroup.ItemText>
-            <RadioGroup.ItemHiddenInput />
-          </RadioGroup.Item>
-        ))}
-      </RadioGroup.Root>
-    )
-  } else if (field.type === 'checkbox') {
-    return (
-      <div className="flex items-start gap-3">
-        <input
-          id={field.id}
-          type="checkbox"
-          checked={value === true}
-          onChange={(e) => onChange(field.id, e.target.checked)}
-          className="mt-0.5 accent-green-700 shrink-0"
-        />
-        <label htmlFor={field.id} className="text-sm text-gray-700 cursor-pointer leading-snug">
-          {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      {label}
-      {control}
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
-  )
 }
 
 // ─── Section renderer ─────────────────────────────────────────────────────────
@@ -242,17 +108,77 @@ function StepIndicator({ sections, currentStep }) {
   )
 }
 
-// ─── Submitted confirmation ───────────────────────────────────────────────────
-function SubmittedState({ emp, onBack }) {
+// ─── PAS result screen ────────────────────────────────────────────────────────
+const PAS_RESULT_CFG = {
+  ENROLLED: {
+    Icon:    CheckCircleOutlineIcon,
+    color:   '#15803d',
+    bg:      '#f0fdf4',
+    border:  '#bbf7d0',
+    heading: 'Enrollment Approved',
+    detail:  (r) => `Member number ${r.member_number} has been created and coverage is now active.`,
+  },
+  PENDING_REVIEW: {
+    Icon:    PendingOutlinedIcon,
+    color:   '#854d0e',
+    bg:      '#fefce8',
+    border:  '#fde68a',
+    heading: 'Pending Underwriting Review',
+    detail:  () => 'Your enrollment has been received and is under manual review. You will be notified once a decision has been made.',
+  },
+  PENDING_EOI: {
+    Icon:    AssignmentLateOutlinedIcon,
+    color:   '#1d4ed8',
+    bg:      '#eff6ff',
+    border:  '#bfdbfe',
+    heading: 'Evidence of Insurability Required',
+    detail:  () => 'Your enrollment is on hold pending receipt of Evidence of Insurability (EOI) documentation.',
+  },
+  INELIGIBLE: {
+    Icon:    BlockOutlinedIcon,
+    color:   '#b91c1c',
+    bg:      '#fef2f2',
+    border:  '#fecaca',
+    heading: 'Enrollment Ineligible',
+    detail:  () => 'This enrollment could not be processed. Please contact your Plan Administrator for assistance.',
+  },
+  ERROR: {
+    Icon:    ErrorOutlineIcon,
+    color:   '#6b7280',
+    bg:      '#f9fafb',
+    border:  '#e5e7eb',
+    heading: 'Submission Error',
+    detail:  () => 'An error occurred while processing your enrollment. Please try again or contact support.',
+  },
+}
+
+function PasResultState({ emp, result, onBack }) {
+  const cfg = PAS_RESULT_CFG[result.status] ?? PAS_RESULT_CFG.ERROR
+  const { Icon } = cfg
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-      <CheckCircleOutlineIcon style={{ fontSize: '3rem', color: colors.brandPrimary }} />
-      <h2 className="text-xl font-bold text-gray-900 mt-4">Enrollment Submitted</h2>
-      <p className="text-sm text-gray-500 mt-2">
-        The enrollment form for <strong>{emp.first_name} {emp.last_name}</strong> has been submitted
-        and is pending review.
+    <div
+      className="rounded-xl p-10 text-center"
+      style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}
+    >
+      <Icon style={{ fontSize: '3rem', color: cfg.color }} />
+      <h2 className="text-xl font-bold text-gray-900 mt-4">{cfg.heading}</h2>
+      <p className="text-sm text-gray-600 mt-2 max-w-md mx-auto">
+        {result.reason ?? cfg.detail(result)}
       </p>
-      <div className="mt-6">
+
+      {/* Meta row */}
+      <div className="flex items-center justify-center gap-6 mt-5 text-xs text-gray-400">
+        {result.pas_ref && <span>Ref: <strong className="text-gray-600">{result.pas_ref}</strong></span>}
+        {result.member_number && <span>Member #: <strong className="text-gray-600">{result.member_number}</strong></span>}
+        {result.mock && (
+          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold">
+            MOCK PAS
+          </span>
+        )}
+      </div>
+
+      <div className="mt-8">
         <Button variant="contained" onClick={onBack}>
           BACK TO MEMBERS
         </Button>
@@ -276,7 +202,8 @@ export default function EnrollmentPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [values, setValues]           = useState({})
   const [errors, setErrors]           = useState({})
-  const [submitted, setSubmitted]     = useState(false)
+  const [submitting, setSubmitting]   = useState(false)
+  const [pasResult, setPasResult]     = useState(null)   // EnrollmentResult from Edge Function
 
   useEffect(() => {
     async function fetchData() {
@@ -362,10 +289,53 @@ export default function EnrollmentPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!validateSection()) return
-    // UI only — no backend write yet
-    setSubmitted(true)
+    setSubmitting(true)
+
+    // Fetch the plan assignment to get plan_id
+    const { data: assignment } = await supabase
+      .from('employee_plan_assignment')
+      .select('plan_id')
+      .eq('employee_id', employeeId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    const planId = assignment?.plan_id
+
+    if (!planId) {
+      setPasResult({
+        status: 'ERROR',
+        reason: 'No plan assignment found for this employee. Please contact your Plan Administrator.',
+        mock: true,
+      })
+      setSubmitting(false)
+      return
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('pas-enrollment-adapter', {
+        body: {
+          employee_id:  employeeId,
+          sponsor_id:   sponsorId,
+          plan_id:      planId,
+          form_data:    values,
+          submitted_by: 'portal',
+        },
+      })
+
+      if (error) throw error
+      setPasResult(data)
+    } catch (err) {
+      setPasResult({
+        status: 'ERROR',
+        reason: `Failed to reach the enrollment service. Please try again. (${err?.message ?? 'unknown error'})`,
+        mock: true,
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -406,8 +376,8 @@ export default function EnrollmentPage() {
 
       <h2 className="text-lg font-semibold text-gray-900 mb-6">Enrollment Form</h2>
 
-      {submitted ? (
-        <SubmittedState emp={emp} onBack={() => navigate('/portal/members')} />
+      {pasResult ? (
+        <PasResultState emp={emp} result={pasResult} onBack={() => navigate('/portal/members')} />
       ) : (
         <>
           {/* Step indicator */}
@@ -435,10 +405,11 @@ export default function EnrollmentPage() {
             {isLastStep ? (
               <Button
                 variant="contained"
-                endIcon={<CheckCircleOutlineIcon />}
+                endIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <CheckCircleOutlineIcon />}
                 onClick={handleSubmit}
+                disabled={submitting}
               >
-                SUBMIT ENROLLMENT
+                {submitting ? 'SUBMITTING…' : 'SUBMIT ENROLLMENT'}
               </Button>
             ) : (
               <Button

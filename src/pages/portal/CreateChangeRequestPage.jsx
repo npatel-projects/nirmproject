@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
 import { Select, createListCollection } from '@ark-ui/react/select'
-import { RadioGroup } from '@ark-ui/react/radio-group'
+import { DynamicSections } from '../../components/DynamicForm'
 import { Button } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -64,14 +64,81 @@ function genRequestNumber() {
   return `CHG-${year}-${rand}`
 }
 
-// ─── Type selector ────────────────────────────────────────────────────────────
-function TypeSelector({ onSelect }) {
+// ─── Step 1 (sponsor only): pick a member ────────────────────────────────────
+function MemberStep({ employees, onNext }) {
+  const [selectedEmpId, setSelectedEmpId] = useState('')
+  const [error, setError] = useState(null)
+
+  const collection = createListCollection({
+    items: employees.map((e) => ({ label: `${e.first_name} ${e.last_name}`, value: e.employee_id })),
+  })
+
+  function handleNext() {
+    if (!selectedEmpId) { setError('Please select a member to continue'); return }
+    onNext(selectedEmpId)
+  }
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Select a member</h1>
+        <p className="text-sm text-gray-500">
+          Choose the member you are submitting this change request on behalf of.
+        </p>
+      </div>
+
+      <div className="max-w-md space-y-4">
+        <div>
+          <Select.Root
+            collection={collection}
+            value={selectedEmpId ? [selectedEmpId] : []}
+            onValueChange={({ value: v }) => { setSelectedEmpId(v[0] ?? ''); setError(null) }}
+          >
+            <Select.Control>
+              <Select.Trigger
+                className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-sm border ${
+                  error ? 'border-red-400' : 'border-gray-300'
+                } rounded-lg bg-white cursor-pointer hover:border-gray-400 focus:outline-none transition-colors`}
+              >
+                <Select.ValueText placeholder="Select a member…" className="text-gray-700 truncate data-[placeholder]:text-gray-400" />
+                <Select.Indicator className="shrink-0">
+                  <KeyboardArrowDownIcon fontSize="small" className="text-gray-400" />
+                </Select.Indicator>
+              </Select.Trigger>
+            </Select.Control>
+            <Select.Positioner>
+              <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 max-h-60 overflow-y-auto min-w-[var(--reference-width)]">
+                {collection.items.map((item) => (
+                  <Select.Item key={item.value} item={item} className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50 outline-none">
+                    <Select.ItemText>{item.label}</Select.ItemText>
+                    <Select.ItemIndicator><CheckIcon style={{ fontSize: 14, color: '#2563eb' }} /></Select.ItemIndicator>
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Positioner>
+          </Select.Root>
+          {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+        </div>
+
+        <Button variant="contained" endIcon={<ChevronRightIcon />} onClick={handleNext}>
+          Continue
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Step 2: pick request type ────────────────────────────────────────────────
+function TypeSelector({ selectedMember, onSelect }) {
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Select the type of change request</h1>
         <p className="text-sm text-gray-500">
-          Choose the change you'd like to make to your benefits. For assistance, contact your plan administrator.
+          {selectedMember
+            ? <>Submitting on behalf of <strong className="text-gray-700">{selectedMember}</strong>. Choose the change to make.</>
+            : "Choose the change you'd like to make to your benefits. For assistance, contact your plan administrator."
+          }
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 mb-8">
@@ -106,205 +173,11 @@ function TypeSelector({ onSelect }) {
   )
 }
 
-// ─── Shared FormField (same pattern as CreateClaimPage) ───────────────────────
-function FormField({ field, value, onChange, error }) {
-  const inputBase = `w-full px-3 py-2 text-sm border rounded-lg focus:outline-none transition-colors ${
-    error ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-blue-400'
-  }`
-  const borderClass = error ? 'border-red-400' : 'border-gray-300'
-
-  const Label = () => (
-    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={field.id}>
-      {field.label}
-      {field.required && <span className="text-red-500 ml-0.5">*</span>}
-    </label>
-  )
-
-  if (field.type === 'select') {
-    const collection = createListCollection({
-      items: (field.options ?? []).map((o) => ({ label: o.label, value: o.value })),
-    })
-    return (
-      <div>
-        <Label />
-        <Select.Root
-          collection={collection}
-          value={value ? [value] : []}
-          onValueChange={({ value: v }) => onChange(field.id, v[0] ?? '')}
-        >
-          <Select.Control>
-            <Select.Trigger className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-sm border ${borderClass} rounded-lg bg-white cursor-pointer hover:border-gray-400 focus:outline-none transition-colors`}>
-              <Select.ValueText placeholder="Select…" className="text-gray-700 truncate data-[placeholder]:text-gray-400" />
-              <Select.Indicator className="shrink-0">
-                <KeyboardArrowDownIcon fontSize="small" className="text-gray-400" />
-              </Select.Indicator>
-            </Select.Trigger>
-          </Select.Control>
-          <Select.Positioner>
-            <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 max-h-60 overflow-y-auto min-w-[var(--reference-width)]">
-              {collection.items.map((item) => (
-                <Select.Item key={item.value} item={item} className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50 outline-none">
-                  <Select.ItemText>{item.label}</Select.ItemText>
-                  <Select.ItemIndicator><CheckIcon style={{ fontSize: 14, color: '#2563eb' }} /></Select.ItemIndicator>
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Positioner>
-        </Select.Root>
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-      </div>
-    )
-  }
-
-  if (field.type === 'radio') {
-    return (
-      <div>
-        <Label />
-        <RadioGroup.Root value={value} onValueChange={({ value: v }) => onChange(field.id, v)} className="flex flex-wrap gap-3 mt-1">
-          {(field.options ?? []).map((o) => (
-            <RadioGroup.Item key={o.value} value={o.value} className="flex items-center gap-2 cursor-pointer group">
-              <RadioGroup.ItemControl className="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center group-data-[state=checked]:border-blue-600 transition-colors">
-                <div className="w-2 h-2 rounded-full bg-blue-600 hidden group-data-[state=checked]:block" />
-              </RadioGroup.ItemControl>
-              <RadioGroup.ItemText className="text-sm text-gray-700">{o.label}</RadioGroup.ItemText>
-              <RadioGroup.ItemHiddenInput />
-            </RadioGroup.Item>
-          ))}
-        </RadioGroup.Root>
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-      </div>
-    )
-  }
-
-  if (field.type === 'checkbox') {
-    return (
-      <div className="flex items-start gap-3 col-span-full">
-        <input
-          id={field.id}
-          type="checkbox"
-          checked={value === true}
-          onChange={(e) => onChange(field.id, e.target.checked)}
-          className="mt-0.5 accent-blue-600 shrink-0"
-        />
-        <label htmlFor={field.id} className="text-sm text-gray-700 cursor-pointer leading-snug">
-          {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-      </div>
-    )
-  }
-
-  if (field.type === 'textarea') {
-    return (
-      <div>
-        <Label />
-        <textarea id={field.id} rows={3} value={value ?? ''} placeholder={field.placeholder ?? ''}
-          onChange={(e) => onChange(field.id, e.target.value)} className={`${inputBase} resize-none`} />
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <Label />
-      <input
-        id={field.id}
-        type={field.type === 'date' ? 'date' : 'text'}
-        value={value ?? ''}
-        placeholder={field.placeholder ?? ''}
-        max={field.type === 'date' ? new Date().toISOString().split('T')[0] : undefined}
-        onChange={(e) => onChange(field.id, e.target.value)}
-        className={inputBase}
-      />
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
-  )
-}
-
-// ─── Dynamic sections ─────────────────────────────────────────────────────────
-function DynamicSections({ sections, values, onChange, errors }) {
-  return sections.map((section) => {
-    const visible = section.fields.filter((f) => {
-      if (!f.show_if) return true
-      return values[f.show_if.field] === f.show_if.value
-    })
-    if (visible.length === 0) return null
-    return (
-      <div key={section.id} className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-1">{section.title}</h3>
-        {section.description && <p className="text-xs text-gray-400 mb-4">{section.description}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-          {visible.map((field) => {
-            const wide = field.type === 'textarea' || field.type === 'radio' || field.type === 'checkbox'
-            return (
-              <div key={field.id} className={wide ? 'col-span-full' : ''}>
-                <FormField field={field} value={values[field.id] ?? ''} onChange={onChange} error={errors[field.id]} />
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  })
-}
-
-// ─── Member selector (sponsor use) ───────────────────────────────────────────
-function MemberSelector({ value, onChange, employees, error }) {
-  const collection = createListCollection({
-    items: employees.map((e) => ({ label: `${e.first_name} ${e.last_name}`, value: e.employee_id })),
-  })
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">Select Member</h3>
-      <Select.Root
-        collection={collection}
-        value={value ? [value] : []}
-        onValueChange={({ value: v }) => onChange(v[0] ?? '')}
-      >
-        <Select.Control>
-          <Select.Trigger className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-sm border ${error ? 'border-red-400' : 'border-gray-300'} rounded-lg bg-white cursor-pointer hover:border-gray-400 focus:outline-none transition-colors`}>
-            <Select.ValueText placeholder="Select a member…" className="text-gray-700 truncate data-[placeholder]:text-gray-400" />
-            <Select.Indicator className="shrink-0">
-              <KeyboardArrowDownIcon fontSize="small" className="text-gray-400" />
-            </Select.Indicator>
-          </Select.Trigger>
-        </Select.Control>
-        <Select.Positioner>
-          <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 max-h-60 overflow-y-auto min-w-[var(--reference-width)]">
-            {collection.items.map((item) => (
-              <Select.Item key={item.value} item={item} className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50 outline-none">
-                <Select.ItemText>{item.label}</Select.ItemText>
-                <Select.ItemIndicator><CheckIcon style={{ fontSize: 14, color: '#2563eb' }} /></Select.ItemIndicator>
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Positioner>
-      </Select.Root>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
-  )
-}
-
-// ─── Request form ─────────────────────────────────────────────────────────────
-function RequestForm({ tile, isMember, activeEntity, sponsorId, template, onSubmit, submitting, submitError }) {
+// ─── Step 3: fill in the form ─────────────────────────────────────────────────
+function RequestForm({ tile, template, onSubmit, submitting, submitError }) {
   const Icon = tile.icon
-  const [values,       setValues]       = useState({})
-  const [errors,       setErrors]       = useState({})
-  const [selectedEmpId, setSelectedEmpId] = useState(isMember ? activeEntity?.employeeId : '')
-  const [employees,    setEmployees]    = useState([])
-
-  useEffect(() => {
-    if (isMember) return
-    supabase
-      .from('employee')
-      .select('employee_id, first_name, last_name')
-      .eq('sponsor_id', sponsorId)
-      .eq('employment_status', 'ACTIVE')
-      .order('last_name')
-      .then(({ data }) => setEmployees(data ?? []))
-  }, [isMember, sponsorId])
+  const [values, setValues] = useState({})
+  const [errors, setErrors] = useState({})
 
   function handleChange(id, val) {
     setValues((v) => ({ ...v, [id]: val }))
@@ -313,7 +186,6 @@ function RequestForm({ tile, isMember, activeEntity, sponsorId, template, onSubm
 
   function validate() {
     const errs = {}
-    if (!isMember && !selectedEmpId) errs._employee = 'Please select a member'
     ;(template?.sections ?? []).forEach((section) => {
       section.fields.forEach((field) => {
         if (!field.required) return
@@ -330,7 +202,7 @@ function RequestForm({ tile, isMember, activeEntity, sponsorId, template, onSubm
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
-    onSubmit({ employeeId: selectedEmpId, formData: values })
+    onSubmit({ formData: values })
   }
 
   return (
@@ -350,17 +222,6 @@ function RequestForm({ tile, isMember, activeEntity, sponsorId, template, onSubm
       </div>
 
       <div className="space-y-4">
-        {/* Member selector — sponsor only */}
-        {!isMember && (
-          <MemberSelector
-            value={selectedEmpId}
-            onChange={(v) => { setSelectedEmpId(v); setErrors((e) => ({ ...e, _employee: undefined })) }}
-            employees={employees}
-            error={errors._employee}
-          />
-        )}
-
-        {/* Dynamic form */}
         {template
           ? <DynamicSections sections={template.sections} values={values} onChange={handleChange} errors={errors} />
           : <div className="text-sm text-gray-400 py-4 text-center">No form configuration found.</div>
@@ -410,13 +271,29 @@ export default function CreateChangeRequestPage() {
   const { personaKey, activeEntity, sponsorId } = usePersona()
   const isMember = personaKey === 'MEMBER'
 
-  const [step,         setStep]         = useState('type')
-  const [selectedTile, setSelectedTile] = useState(null)
-  const [template,     setTemplate]     = useState(null)
-  const [loadingForm,  setLoadingForm]  = useState(false)
-  const [submitting,   setSubmitting]   = useState(false)
-  const [submitError,  setSubmitError]  = useState(null)
-  const [submittedNum, setSubmittedNum] = useState(null)
+  // Sponsors start at 'member', members start at 'type'
+  const [step,          setStep]         = useState(isMember ? 'type' : 'member')
+  const [selectedEmpId, setSelectedEmpId] = useState(isMember ? (activeEntity?.employeeId ?? '') : '')
+  const [selectedMemberName, setSelectedMemberName] = useState('')
+  const [employees,     setEmployees]    = useState([])
+  const [selectedTile,  setSelectedTile] = useState(null)
+  const [template,      setTemplate]     = useState(null)
+  const [loadingForm,   setLoadingForm]  = useState(false)
+  const [submitting,    setSubmitting]   = useState(false)
+  const [submitError,   setSubmitError]  = useState(null)
+  const [submittedNum,  setSubmittedNum] = useState(null)
+
+  // Fetch employees once for sponsor
+  useEffect(() => {
+    if (isMember) return
+    supabase
+      .from('employee')
+      .select('employee_id, first_name, last_name')
+      .eq('sponsor_id', sponsorId)
+      .eq('employment_status', 'ACTIVE')
+      .order('last_name')
+      .then(({ data }) => setEmployees(data ?? []))
+  }, [isMember, sponsorId])
 
   // Auto-select tile from ?type= query param
   useEffect(() => {
@@ -426,11 +303,17 @@ export default function CreateChangeRequestPage() {
     if (tile) handleSelectTile(tile)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  function handleMemberNext(empId) {
+    const emp = employees.find((e) => e.employee_id === empId)
+    setSelectedEmpId(empId)
+    setSelectedMemberName(emp ? `${emp.first_name} ${emp.last_name}` : '')
+    setStep('type')
+  }
+
   async function handleSelectTile(tile) {
     setSelectedTile(tile)
     setStep('form')
     setLoadingForm(true)
-
     const { data } = await supabase
       .from('change_request_form_template')
       .select('form_config')
@@ -438,20 +321,17 @@ export default function CreateChangeRequestPage() {
       .eq('is_active', true)
       .is('sponsor_id', null)
       .single()
-
     setTemplate(data?.form_config ?? null)
     setLoadingForm(false)
   }
 
-  async function handleSubmit({ employeeId, formData }) {
+  async function handleSubmit({ formData }) {
     setSubmitting(true)
     setSubmitError(null)
     const requestNumber = genRequestNumber()
-    const empId = isMember ? activeEntity?.employeeId : employeeId
-
     const { error } = await supabase.from('change_request').insert({
       request_number:    requestNumber,
-      employee_id:       empId,
+      employee_id:       selectedEmpId,
       member_id:         isMember ? activeEntity?.id : null,
       submitted_by:      SYSTEM_USER_ID,
       request_type:      selectedTile.requestType,
@@ -459,7 +339,6 @@ export default function CreateChangeRequestPage() {
       submission_date:   new Date().toISOString().split('T')[0],
       request_form_json: formData,
     })
-
     if (error) { setSubmitError(error.message); setSubmitting(false); return }
     setSubmittedNum(requestNumber)
     setStep('success')
@@ -468,40 +347,47 @@ export default function CreateChangeRequestPage() {
 
   function handleBack() {
     if (step === 'form') {
-      if (searchParams.get('type')) {
-        navigate(-1)
-      } else {
-        setStep('type')
-        setSelectedTile(null)
-      }
+      setStep('type'); setSelectedTile(null)
+    } else if (step === 'type') {
+      isMember ? navigate('/portal/requests') : setStep('member')
     } else {
       navigate('/portal/requests')
     }
   }
 
   function handleNewRequest() {
-    setStep('type'); setSelectedTile(null); setTemplate(null)
+    setStep(isMember ? 'type' : 'member')
+    setSelectedTile(null); setTemplate(null)
     setSubmittedNum(null); setSubmitError(null)
+    if (!isMember) { setSelectedEmpId(''); setSelectedMemberName('') }
   }
+
+  const backLabel = step === 'member' || (step === 'type' && isMember) ? 'Back to Requests' : 'Back'
 
   return (
     <div>
       {step !== 'success' && (
         <Button variant="text" startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mb: 3, pl: 0 }}>
-          {step === 'type' ? 'Back to Requests' : 'Back'}
+          {backLabel}
         </Button>
       )}
 
-      {step === 'type' && <TypeSelector onSelect={handleSelectTile} />}
+      {step === 'member' && (
+        <MemberStep employees={employees} onNext={handleMemberNext} />
+      )}
+
+      {step === 'type' && (
+        <TypeSelector
+          selectedMember={selectedMemberName || null}
+          onSelect={handleSelectTile}
+        />
+      )}
 
       {step === 'form' && (
         loadingForm
           ? <div className="text-sm text-gray-400 py-16 text-center">Loading form…</div>
           : <RequestForm
               tile={selectedTile}
-              isMember={isMember}
-              activeEntity={activeEntity}
-              sponsorId={sponsorId}
               template={template}
               onSubmit={handleSubmit}
               submitting={submitting}

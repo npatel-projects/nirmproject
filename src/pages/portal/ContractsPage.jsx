@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
-import { Chip } from '@mui/material'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import StatusChip from '../../components/StatusChip'
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined'
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -14,24 +14,6 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-CA', {
     month: 'short', day: 'numeric', year: 'numeric',
   })
-}
-
-function StatusChip({ status }) {
-  const active = status === 'ACTIVE'
-  return (
-    <Chip
-      label={status}
-      size="small"
-      variant="outlined"
-      sx={{
-        borderColor: active ? colors.brandPrimary : '#9ca3af',
-        color:       active ? colors.brandPrimary : '#6b7280',
-        fontWeight:  600,
-        fontSize:    '0.65rem',
-        letterSpacing: '0.05em',
-      }}
-    />
-  )
 }
 
 function MetaItem({ icon: Icon, label, value }) {

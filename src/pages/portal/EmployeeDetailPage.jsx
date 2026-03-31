@@ -14,6 +14,7 @@ import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined'
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined'
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined'
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import { colors } from '../../theme'
 import { usePersona } from '../../context/PersonaContext'
 import { generateMemberCertificate } from '../../lib/generateMemberCertificate'
@@ -95,6 +96,34 @@ function EnrollmentBanner({ onSend }) {
         style={{ backgroundColor: '#2563eb', whiteSpace: 'nowrap', flexShrink: 0 }}
       >
         SEND ENROLLMENT REMINDER
+      </Button>
+    </div>
+  )
+}
+
+function SelfEnrollmentBanner({ onStart }) {
+  return (
+    <div
+      className="flex items-center justify-between gap-4 rounded-lg px-5 py-4 mb-6"
+      style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}
+    >
+      <div className="flex items-center gap-3">
+        <InfoOutlinedIcon style={{ color: '#2563eb' }} />
+        <div>
+          <p className="text-sm font-semibold text-blue-800">Enrollment Required</p>
+          <p className="text-xs text-blue-700">
+            Welcome! You haven't enrolled in your benefits yet. Please complete the enrollment process to select your coverage options and designate your beneficiaries.
+          </p>
+        </div>
+      </div>
+      <Button
+        variant="contained"
+        size="small"
+        startIcon={<AccountCircleOutlinedIcon />}
+        onClick={onStart}
+        style={{ backgroundColor: '#2563eb', whiteSpace: 'nowrap', flexShrink: 0 }}
+      >
+        Start Enrollment Now
       </Button>
     </div>
   )
@@ -347,7 +376,6 @@ const ALL_TABS = [
   { id: 'details',  label: 'Employee Details',          enrolledOnly: false },
   { id: 'plan',     label: 'Plan Summary',              enrolledOnly: true },
   { id: 'ben-dep',  label: 'Beneficiaries & Dependents', enrolledOnly: true },
-  { id: 'requests', label: 'Requests',                  enrolledOnly: true },
 ]
 
 export default function EmployeeDetailPage() {
@@ -473,7 +501,10 @@ export default function EmployeeDetailPage() {
       </div>
 
       {/* Enrollment banner for non-enrolled employees */}
-      {!isEnrolled && (
+      {!isEnrolled && personaKey === 'MEMBER' && (
+        <SelfEnrollmentBanner onStart={() => navigate(`/portal/members/${employeeId}/enroll`)} />
+      )}
+      {!isEnrolled && personaKey !== 'MEMBER' && (
         <EnrollmentBanner onSend={() => alert('Enrollment reminder sent (UI only).')} />
       )}
 
@@ -553,13 +584,7 @@ export default function EmployeeDetailPage() {
           <BeneficiariesDependentsTab memberId={activeMember?.member_id ?? null} />
         </Tabs.Content>
 
-        {/* ── Requests tab ── */}
-        <Tabs.Content value="requests">
-          <div className="bg-white border border-gray-200 rounded-lg p-10 text-center">
-            <HealthAndSafetyOutlinedIcon style={{ fontSize: '2.5rem', color: '#d1d5db' }} />
-            <p className="text-sm text-gray-400 mt-3">No open requests for this employee.</p>
-          </div>
-        </Tabs.Content>
+
       </Tabs.Root>
     </div>
   )

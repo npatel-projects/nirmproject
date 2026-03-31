@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
 import { Tabs } from '@ark-ui/react/tabs'
-import { Button, Chip } from '@mui/material'
+import { Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
-import { colors } from '../../theme'
+import StatusChip from '../../components/StatusChip'
 
 const IN_PROGRESS_STATUSES = ['DRAFT', 'SUBMITTED', 'IN_REVIEW']
 const COMPLETED_STATUSES   = ['APPROVED', 'DECLINED', 'CANCELLED']
@@ -17,26 +17,6 @@ const REQUEST_TYPE_LABELS = {
   REMOVE_DEPENDENT:   'Remove Dependent',
   LIFE_EVENT:         'Life Event',
   COVERAGE_CHANGE:    'Coverage Change',
-}
-
-function StatusChip({ status }) {
-  const map = {
-    DRAFT:     { label: 'Draft',     borderColor: '#9ca3af', color: '#6b7280' },
-    SUBMITTED: { label: 'Pending',   borderColor: '#d97706', color: '#d97706' },
-    IN_REVIEW: { label: 'In Review', borderColor: '#2563eb', color: '#2563eb' },
-    APPROVED:  { label: 'Approved',  borderColor: '#16a34a', color: '#16a34a' },
-    DECLINED:  { label: 'Declined',  borderColor: '#dc2626', color: '#dc2626' },
-    CANCELLED: { label: 'Cancelled', borderColor: '#9ca3af', color: '#6b7280' },
-  }
-  const cfg = map[status] ?? { label: status, borderColor: '#9ca3af', color: '#6b7280' }
-  return (
-    <Chip
-      label={cfg.label}
-      size="small"
-      variant="outlined"
-      sx={{ fontSize: 11, height: 22, fontWeight: 600, borderColor: cfg.borderColor, color: cfg.color }}
-    />
-  )
 }
 
 function formatDate(d) {
@@ -171,17 +151,18 @@ export default function ChangeRequestsPage() {
 
       {!loading && !error && (
         <Tabs.Root defaultValue="in-progress">
-          <Tabs.List className="flex gap-1 border-b border-gray-200 mb-6">
+          <Tabs.List className="flex gap-6 border-b border-gray-200 mb-6">
             <Tabs.Trigger value="in-progress" className={tabClass}>
               In Progress
-              {inProgress.length > 0 && (
-                <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">
-                  {inProgress.length}
-                </span>
-              )}
+              <span className="ml-1.5 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                {inProgress.length}
+              </span>
             </Tabs.Trigger>
             <Tabs.Trigger value="completed" className={tabClass}>
               Completed
+              <span className="ml-1.5 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                {completed.length}
+              </span>
             </Tabs.Trigger>
           </Tabs.List>
 

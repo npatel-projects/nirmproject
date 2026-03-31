@@ -10,6 +10,14 @@ export const PERSONAS = {
     allowedRoutes: ['contracts', 'plans', 'members', 'member-profile', 'analytics', 'contacts', 'claims', 'requests', 'messages'],
     defaultRoute:  '/portal/contracts',
   },
+  BROKER: {
+    key:           'BROKER',
+    label:         'Broker',
+    description:   'Manage your book of business',
+    initials:      'BR',
+    allowedRoutes: ['broker-groups'],
+    defaultRoute:  '/portal/broker/groups',
+  },
   MEMBER: {
     key:           'MEMBER',
     label:         'Member',
@@ -48,10 +56,13 @@ export function PersonaProvider({ children }) {
     return PERSONAS[personaKey]?.allowedRoutes.includes(route) ?? false
   }
 
-  // Convenience: the sponsor ID to use in queries
   const sponsorId = personaKey === 'SPONSOR_ADMIN'
     ? (activeEntity?.id ?? 'a1000000-0000-0000-0000-000000000001')
     : 'a1000000-0000-0000-0000-000000000001'
+
+  const brokerId = personaKey === 'BROKER'
+    ? (activeEntity?.id ?? 'b0000001-0000-0000-0000-000000000001')
+    : null
 
   return (
     <PersonaContext.Provider value={{
@@ -59,6 +70,7 @@ export function PersonaProvider({ children }) {
       persona: PERSONAS[personaKey],
       activeEntity,
       sponsorId,
+      brokerId,
       switchTo,
       can,
     }}>

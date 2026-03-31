@@ -16,6 +16,7 @@ import CreateChangeRequestPage from './pages/portal/CreateChangeRequestPage'
 import ChangeRequestDetailPage from './pages/portal/ChangeRequestDetailPage'
 import ContactsPage from './pages/portal/ContactsPage'
 import AnalyticsPage from './pages/portal/AnalyticsPage'
+import MyGroupsPage from './pages/portal/MyGroupsPage'
 import MessagesPage from './pages/portal/MessagesPage'
 import MessageDetailPage from './pages/portal/MessageDetailPage'
 import TestPage from './pages/portal/TestPage'
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="requests/:requestId" element={<PersonaGuard route="requests"><ChangeRequestDetailPage /></PersonaGuard>} />
           <Route path="contacts" element={<PersonaGuard route="contacts"><ContactsPage /></PersonaGuard>} />
           <Route path="analytics" element={<PersonaGuard route="analytics"><AnalyticsPage /></PersonaGuard>} />
+          <Route path="broker/groups" element={<PersonaGuard route="broker-groups"><MyGroupsPage /></PersonaGuard>} />
           <Route path="messages" element={<PersonaGuard route="messages"><MessagesPage /></PersonaGuard>} />
           <Route path="messages/:messageId" element={<PersonaGuard route="messages"><MessageDetailPage /></PersonaGuard>} />
           <Route path="test" element={<TestPage />} />

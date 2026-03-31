@@ -48,6 +48,18 @@ export default function PortalHeader() {
     if (key === 'SPONSOR_ADMIN') {
       const { data } = await supabase.from('sponsor').select('sponsor_id, sponsor_name')
       setEntities((data ?? []).map((s) => ({ id: s.sponsor_id, label: s.sponsor_name })))
+    } else if (key === 'BROKER') {
+      const { data } = await supabase
+        .from('broker')
+        .select('broker_id, first_name, last_name, broker_code')
+        .eq('status', 'ACTIVE')
+      setEntities(
+        (data ?? []).map((b) => ({
+          id: b.broker_id,
+          label: `${b.first_name} ${b.last_name}`,
+          brokerCode: b.broker_code,
+        }))
+      )
     } else if (key === 'MEMBER') {
       const { data } = await supabase
         .from('employee')
@@ -84,7 +96,7 @@ export default function PortalHeader() {
     setExpandedPersona(null)
     if (key === 'MEMBER') {
       if (entity.enrolled === false) {
-        navigate('/portal') // self-enrollment landing — TBD
+        navigate('/portal')
       } else {
         navigate(`/portal/members/${entity.employeeId}`)
       }
@@ -245,19 +257,7 @@ export default function PortalHeader() {
                 )
               })}
 
-              {/* Broker — coming soon */}
-              <div className="border-t border-gray-100">
-                <div className="flex items-center gap-3 px-4 py-3 opacity-40 cursor-not-allowed">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-gray-200 text-gray-500">
-                    BR
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">Broker</p>
-                    <p className="text-xs text-gray-500">Coming soon</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+                    </div>
           )}
         </div>
       </div>

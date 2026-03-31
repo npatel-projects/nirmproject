@@ -15,6 +15,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
+import FolderSharedOutlinedIcon from '@mui/icons-material/FolderSharedOutlined'
 
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
@@ -107,6 +108,12 @@ export default function PortalLayout() {
             <NavLink to="/portal/contacts" className={navLinkClass}>
               <ContactPhoneOutlinedIcon fontSize="small" className="shrink-0" />
               <span className="hidden md:inline">Contacts</span>
+            </NavLink>
+          )}
+          {can('broker-groups') && (
+            <NavLink to="/portal/broker/groups" className={navLinkClass}>
+              <FolderSharedOutlinedIcon fontSize="small" className="shrink-0" />
+              <span className="hidden md:inline">My Groups</span>
             </NavLink>
           )}
         </nav>

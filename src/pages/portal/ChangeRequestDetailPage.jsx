@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Button, Chip } from '@mui/material'
+import { Button } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import StatusChip from '../../components/StatusChip'
+import { ReadOnlyField, ReadOnlySections } from '../../components/ReadOnlyForm'
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined'
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined'
 import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined'
@@ -20,70 +22,6 @@ const TILE_META = {
 function formatDate(d) {
   if (!d) return '—'
   return new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function StatusChip({ status }) {
-  const map = {
-    DRAFT:     { label: 'Draft',     borderColor: '#9ca3af', color: '#6b7280' },
-    SUBMITTED: { label: 'Pending',   borderColor: '#d97706', color: '#d97706' },
-    IN_REVIEW: { label: 'In Review', borderColor: '#2563eb', color: '#2563eb' },
-    APPROVED:  { label: 'Approved',  borderColor: '#16a34a', color: '#16a34a' },
-    DECLINED:  { label: 'Declined',  borderColor: '#dc2626', color: '#dc2626' },
-    CANCELLED: { label: 'Cancelled', borderColor: '#9ca3af', color: '#6b7280' },
-  }
-  const cfg = map[status] ?? { label: status, borderColor: '#9ca3af', color: '#6b7280' }
-  return (
-    <Chip
-      label={cfg.label}
-      size="small"
-      variant="outlined"
-      sx={{ fontSize: 12, height: 24, fontWeight: 600, borderColor: cfg.borderColor, color: cfg.color }}
-    />
-  )
-}
-
-function ReadOnlyField({ field, value }) {
-  let display = value || '—'
-  if (field.type === 'select' || field.type === 'radio') {
-    const opt = (field.options ?? []).find((o) => o.value === value)
-    display = opt?.label ?? value ?? '—'
-  } else if (field.type === 'date') {
-    display = formatDate(value)
-  } else if (field.type === 'checkbox') {
-    display = value === true || value === 'true' ? 'Yes' : 'No'
-  }
-  return (
-    <div>
-      <p className="text-xs font-medium text-gray-500 mb-1">{field.label}</p>
-      <p className="text-sm text-gray-900">{display}</p>
-    </div>
-  )
-}
-
-function ReadOnlySections({ sections, values }) {
-  return sections.map((section) => {
-    const visible = section.fields.filter((f) => {
-      if (!f.show_if) return true
-      return values[f.show_if.field] === f.show_if.value
-    })
-    if (visible.length === 0) return null
-    return (
-      <div key={section.id} className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-1">{section.title}</h3>
-        {section.description && <p className="text-xs text-gray-400 mb-4">{section.description}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-          {visible.map((field) => {
-            const wide = field.type === 'textarea' || field.type === 'radio' || field.type === 'checkbox'
-            return (
-              <div key={field.id} className={wide ? 'col-span-full' : ''}>
-                <ReadOnlyField field={field} value={values[field.id]} />
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  })
 }
 
 export default function ChangeRequestDetailPage() {
