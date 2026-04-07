@@ -10,8 +10,12 @@
 
 import { Select, createListCollection } from '@ark-ui/react/select'
 import { RadioGroup } from '@ark-ui/react/radio-group'
+import { FileUpload } from '@ark-ui/react/file-upload'
 import CheckIcon from '@mui/icons-material/Check'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined'
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined'
+import CloseIcon from '@mui/icons-material/Close'
 
 function normalizeOptions(options = []) {
   return options.map((o) => (typeof o === 'string' ? { value: o, label: o } : o))
@@ -165,6 +169,59 @@ export function FormField({ field, value, onChange, error }) {
     )
   }
 
+  // ── File upload ───────────────────────────────────────────────────────────
+  if (field.type === 'file_upload') {
+    const files = Array.isArray(value) ? value : []
+    function removeFile(i) { onChange(field.id, files.filter((_, idx) => idx !== i)) }
+    function formatBytes(b) {
+      if (b < 1024) return `${b} B`
+      if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)} KB`
+      return `${(b / (1024 * 1024)).toFixed(1)} MB`
+    }
+    return (
+      <div className="col-span-full">
+        {field.description && (
+          <p className="text-xs text-gray-400 mb-3">{field.description}</p>
+        )}
+        <FileUpload.Root
+          maxFiles={10}
+          maxFileSize={10 * 1024 * 1024}
+          accept="image/jpeg,image/png,application/pdf,image/heic"
+          onFileChange={({ acceptedFiles }) => onChange(field.id, [...files, ...acceptedFiles].slice(0, 10))}
+        >
+          <FileUpload.Dropzone className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-lg px-6 py-6 cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors text-center">
+            <UploadFileOutlinedIcon style={{ fontSize: 28, color: '#9ca3af' }} />
+            <div>
+              <FileUpload.Trigger className="text-sm font-medium text-interactive hover:underline cursor-pointer">
+                Click to upload
+              </FileUpload.Trigger>
+              <span className="text-sm text-gray-500"> or drag and drop</span>
+            </div>
+            <p className="text-xs text-gray-400">PDF, JPG, PNG · max 10 MB · up to 10 files</p>
+          </FileUpload.Dropzone>
+          <FileUpload.HiddenInput />
+        </FileUpload.Root>
+        {files.length > 0 && (
+          <ul className="mt-3 space-y-2">
+            {files.map((f, i) => (
+              <li key={i} className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                <InsertDriveFileOutlinedIcon style={{ fontSize: 16, color: '#6b7280', flexShrink: 0 }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-800 truncate">{f.name}</p>
+                  <p className="text-xs text-gray-400">{formatBytes(f.size)}</p>
+                </div>
+                <button type="button" onClick={() => removeFile(i)} className="p-0.5 rounded hover:bg-gray-200 shrink-0">
+                  <CloseIcon style={{ fontSize: 14, color: '#9ca3af' }} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      </div>
+    )
+  }
+
   // ── Text / email / phone / date ───────────────────────────────────────────
   return (
     <div>
@@ -200,12 +257,13 @@ export function DynamicSections({ sections, values, onChange, errors }) {
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
           {visible.map((field) => {
-            const wide = field.type === 'textarea' || field.type === 'radio' || field.type === 'checkbox'
+            const wide = field.type === 'textarea' || field.type === 'radio' || field.type === 'checkbox' || field.type === 'file_upload'
+            const defaultValue = field.type === 'file_upload' ? [] : ''
             return (
               <div key={field.id} className={wide ? 'col-span-full' : ''}>
                 <FormField
                   field={field}
-                  value={values[field.id] ?? ''}
+                  value={values[field.id] ?? defaultValue}
                   onChange={onChange}
                   error={errors?.[field.id]}
                 />

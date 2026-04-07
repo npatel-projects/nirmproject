@@ -18,9 +18,9 @@ function formatDate(dateStr) {
 
 function MetaItem({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-start gap-2 min-w-0">
-      <Icon style={{ fontSize: '0.95rem', color: '#9ca3af', marginTop: '2px', flexShrink: 0 }} />
-      <div className="min-w-0">
+    <div className="flex items-center gap-2 w-36 shrink-0">
+      <Icon style={{ fontSize: '0.95rem', color: '#9ca3af', flexShrink: 0 }} />
+      <div>
         <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold leading-none mb-0.5">
           {label}
         </p>
@@ -72,7 +72,7 @@ function ContractRow({ contract }) {
       </div>
 
       {/* Meta columns */}
-      <div className="hidden md:flex items-center gap-8 shrink-0">
+      <div className="hidden md:flex items-center gap-4 shrink-0">
         <MetaItem
           icon={CalendarTodayOutlinedIcon}
           label="Effective"

@@ -44,7 +44,7 @@ function RequestRow({ req, onClick }) {
       onClick={onClick}
     >
       <td className="px-5 py-3.5 text-sm font-medium">
-        <button className="text-blue-600 hover:underline" onClick={onClick}>
+        <button className="text-interactive hover:underline" onClick={onClick}>
           {req.request_number ?? '—'}
         </button>
       </td>
@@ -91,7 +91,7 @@ function RequestTable({ rows, navigate }) {
 }
 
 const tabClass = `px-4 py-2.5 text-sm font-medium text-gray-500 border-b-2 border-transparent -mb-px transition-colors
-  data-[selected]:text-blue-600 data-[selected]:border-blue-600 hover:text-gray-700 focus:outline-none`
+  data-[selected]:text-interactive data-[selected]:border-interactive hover:text-gray-700 focus:outline-none`
 
 export default function ChangeRequestsPage() {
   const navigate = useNavigate()

@@ -15,8 +15,8 @@ export const colors = {
   brandAccent:       '#ffcd00',
 
   // Navigation
-  navActiveBg:       '#eff6ff',
-  navActiveText:     '#1d4ed8',
+  navActiveBg:       '#eef2fa',
+  navActiveText:     '#3b5ea6',
   navHoverBg:        '#f3f4f6',
   navText:           '#4b5563',
 
@@ -32,8 +32,8 @@ export const colors = {
   textMuted:         '#9ca3af',
 
   // Link / interactive
-  link:              '#2563eb',
-  linkHover:         '#1e40af',
+  link:              '#3b5ea6',
+  linkHover:         '#2d4a85',
 
   // Status
   success:           '#16a34a',

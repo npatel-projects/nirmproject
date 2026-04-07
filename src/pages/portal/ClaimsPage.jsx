@@ -154,7 +154,7 @@ function InProgressTab({ claims, onDeleted }) {
               <tr key={c.claim_id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 font-medium">
                   <button
-                    className="text-blue-600 hover:underline"
+                    className="text-interactive hover:underline"
                     onClick={() => navigate(`/portal/claims/${c.claim_id}`)}
                   >
                     {c.claim_number}
@@ -222,7 +222,7 @@ function CompletedTab({ claims }) {
               <EmptyState message="No completed claims" />
             ) : sorted.map((c) => (
               <tr key={c.claim_id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-blue-600 font-medium whitespace-nowrap">
+                <td className="px-4 py-3 text-interactive font-medium whitespace-nowrap">
                   <button
                     className="hover:underline"
                     onClick={() => navigate(`/portal/claims/${c.claim_id}`)}
@@ -273,7 +273,7 @@ function EstimatesTab({ estimates }) {
               <EmptyState message="No dental estimates" />
             ) : sorted.map((e) => (
               <tr key={e.estimate_id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-blue-600 font-medium whitespace-nowrap">
+                <td className="px-4 py-3 text-interactive font-medium whitespace-nowrap">
                   {formatDate(e.statement_date)}
                 </td>
                 <td className="px-4 py-3 text-gray-600">{e.typeLabel}</td>
@@ -424,7 +424,7 @@ export default function ClaimsPage() {
               <Tabs.Trigger
                 key={tab.value}
                 value={tab.value}
-                className="pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent data-[selected]:border-blue-600 data-[selected]:text-blue-700 transition-colors cursor-pointer whitespace-nowrap"
+                className="pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent data-[selected]:border-interactive data-[selected]:text-interactive transition-colors cursor-pointer whitespace-nowrap"
               >
                 {tab.label}
                 <span className="ml-1.5 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">

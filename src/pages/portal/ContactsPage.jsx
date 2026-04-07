@@ -83,7 +83,7 @@ function ContactRow({ icon: Icon, label, value, href }) {
       <div className="flex items-baseline gap-2 flex-wrap text-sm">
         <span className="text-gray-500 shrink-0">{label}</span>
         {href ? (
-          <a href={href} className="text-blue-600 hover:underline">{value}</a>
+          <a href={href} className="text-interactive hover:underline">{value}</a>
         ) : (
           <span className="text-gray-800">{value}</span>
         )}
@@ -195,7 +195,7 @@ export default function ContactsPage() {
       <p className="text-sm text-gray-500 mb-1">{t('contacts.intro')}</p>
       <p className="text-sm text-gray-500 mb-6">
         {t('contacts.websiteNote')}{' '}
-        <a href={WEBSITE_URL} className="text-blue-600 hover:underline">{WEBSITE_URL}</a>
+        <a href={WEBSITE_URL} className="text-interactive hover:underline">{WEBSITE_URL}</a>
       </p>
 
       {/* Sponsor admins see all sections; members see member section first */}

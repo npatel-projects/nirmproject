@@ -30,7 +30,7 @@ export default function PlansPage() {
       const [plansRes, contractsRes] = await Promise.all([
         supabase
           .from('plan')
-          .select('plan_id, plan_name, plan_code, status, contract_id, group_contract(contract_id, contract_name, contract_number)')
+          .select('plan_id, plan_name, plan_code, plan_type, status, contract_id, group_contract(contract_id, contract_name, contract_number)')
           .order('plan_name'),
         supabase
           .from('group_contract')
@@ -126,6 +126,11 @@ export default function PlansPage() {
                       Contract <UnfoldMoreIcon fontSize="small" className="text-gray-400" />
                     </span>
                   </th>
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer select-none">
+                    <span className="flex items-center gap-1">
+                      Plan Type <UnfoldMoreIcon fontSize="small" className="text-gray-400" />
+                    </span>
+                  </th>
                   <th className="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
                 </tr>
               </thead>
@@ -142,12 +147,13 @@ export default function PlansPage() {
                     <td className="px-6 py-3 text-gray-600">
                       {plan.group_contract?.contract_name ?? '—'}
                     </td>
+                    <td className="px-6 py-3 text-gray-600">{plan.plan_type ?? '—'}</td>
                     <td className="px-6 py-3 text-gray-600">{plan.status}</td>
                   </tr>
                 ))}
                 {paginated.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-6 py-10 text-center text-sm text-gray-400">
+                    <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-400">
                       No plans found.
                     </td>
                   </tr>

@@ -9,8 +9,8 @@
   --color-brand-accent:         #ffcd00;
 
   /* Navigation */
-  --color-nav-active-bg:        #eff6ff;   /* blue-50  */
-  --color-nav-active-text:      #1d4ed8;   /* blue-700 */
+  --color-nav-active-bg:        #eef2fa;
+  --color-nav-active-text:      #3b5ea6;
   --color-nav-hover-bg:         #f3f4f6;   /* gray-100 */
   --color-nav-text:             #4b5563;   /* gray-600 */
 
@@ -26,8 +26,15 @@
   --color-text-muted:           #9ca3af;   /* gray-400 */
 
   /* Link / interactive */
-  --color-link:                 #2563eb;   /* blue-600 */
-  --color-link-hover:           #1e40af;   /* blue-800 */
+  --color-link:                 #3b5ea6;
+  --color-link-hover:           #2d4a85;
+
+  /* Interactive UI — tabs, badges, hyperlinks (softer than blue-600) */
+  --color-interactive:          #3b5ea6;
+  --color-interactive-bg:       #eef2fa;
+  --color-interactive-text:     #3b5ea6;
+  --color-interactive-badge-bg: #e8edf7;
+  --color-interactive-badge-text: #3b5ea6;
 
   /* Status */
   --color-success:              #16a34a;

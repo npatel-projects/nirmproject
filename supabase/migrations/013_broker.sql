@@ -60,9 +60,7 @@ VALUES (
 INSERT INTO sponsor (sponsor_id, sponsor_name, sponsor_type, country_code, province_state_code, status, total_lives, last_activity_date)
 VALUES
   ('c0000001-0000-0000-0000-000000000001', 'Acme Manufacturing Inc.',  'EMPLOYER', 'CA', 'ON', 'ACTIVE',  89, CURRENT_DATE - INTERVAL  '3 days'),
-  ('c0000001-0000-0000-0000-000000000002', 'TechStart Solutions',      'EMPLOYER', 'CA', 'BC', 'ACTIVE',  34, CURRENT_DATE - INTERVAL  '1 day'),
-  ('c0000001-0000-0000-0000-000000000003', 'Northern Logistics Ltd.',  'EMPLOYER', 'CA', 'AB', 'ACTIVE', 156, CURRENT_DATE - INTERVAL '10 days'),
-  ('c0000001-0000-0000-0000-000000000004', 'Metro Healthcare Group',   'EMPLOYER', 'CA', 'QC', 'ACTIVE',   0, CURRENT_DATE - INTERVAL '45 days')
+  ('c0000001-0000-0000-0000-000000000002', 'TechStart Solutions',      'EMPLOYER', 'CA', 'BC', 'ACTIVE',  34, CURRENT_DATE - INTERVAL  '1 day')
 ON CONFLICT DO NOTHING;
 
 -- Backfill lives/activity on the existing demo sponsor
@@ -77,9 +75,7 @@ WHERE sponsor_id = 'a1000000-0000-0000-0000-000000000001';
 INSERT INTO group_contract (contract_id, sponsor_id, contract_name, contract_number, funding_type, country_code, status, effective_date, renewal_date, annual_premium_estimate)
 VALUES
   ('d0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000001', 'Acme Group Benefits Plan',  'GH-7721', 'INSURED', 'CA', 'ACTIVE',  '2024-05-01', (CURRENT_DATE + INTERVAL  '45 days')::date, 220000.00),
-  ('d0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000002', 'TechStart Benefits Plan',   'GH-8834', 'INSURED', 'CA', 'PENDING', '2024-03-01', (CURRENT_DATE + INTERVAL  '12 days')::date,  98000.00),
-  ('d0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000003', 'Northern Logistics Plan',   'GH-5503', 'INSURED', 'CA', 'ACTIVE',  '2023-10-01', (CURRENT_DATE + INTERVAL '120 days')::date, 445000.00),
-  ('d0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000004', 'Metro Healthcare Benefits', 'GH-4422', 'INSURED', 'CA', 'LAPSED',  '2023-04-01', (CURRENT_DATE - INTERVAL  '15 days')::date,      NULL)
+  ('d0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000002', 'TechStart Benefits Plan',   'GH-8834', 'INSURED', 'CA', 'PENDING', '2024-03-01', (CURRENT_DATE + INTERVAL  '12 days')::date,  98000.00)
 ON CONFLICT DO NOTHING;
 
 -- Backfill annual_premium_estimate on existing demo contract
@@ -92,9 +88,7 @@ INSERT INTO broker_sponsor (broker_id, sponsor_id, role)
 VALUES
   ('b0000001-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'PRIMARY'),
   ('b0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000001', 'PRIMARY'),
-  ('b0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000002', 'PRIMARY'),
-  ('b0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000003', 'MGA_ADVISOR'),
-  ('b0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000004', 'PRIMARY')
+  ('b0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000002', 'PRIMARY')
 ON CONFLICT DO NOTHING;
 
 -- ── Seed: pending actions ─────────────────────────────────────────────────────
@@ -103,7 +97,5 @@ VALUES
   ('e0000001-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'OUTSTANDING_EOI',   'EOI required for 3 late enrolees',            CURRENT_DATE + INTERVAL '14 days'),
   ('e0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000001', 'MISSING_DOCUMENTS', 'Missing plan administrator agreement',         CURRENT_DATE + INTERVAL  '7 days'),
   ('e0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000002', 'UNSIGNED_RENEWAL',  'Renewal documents awaiting signature',         CURRENT_DATE + INTERVAL  '5 days'),
-  ('e0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000002', 'MISSING_CENSUS',    'Annual census data not yet submitted',         CURRENT_DATE + INTERVAL '12 days'),
-  ('e0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000003', 'OUTSTANDING_EOI',   'Late enrolment evidence required for 1 life',  CURRENT_DATE + INTERVAL '30 days'),
-  ('e0000001-0000-0000-0000-000000000006', 'c0000001-0000-0000-0000-000000000004', 'UNSIGNED_RENEWAL',  'Lapsed — renewal package not returned',        CURRENT_DATE - INTERVAL  '5 days')
+  ('e0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000002', 'MISSING_CENSUS',    'Annual census data not yet submitted',         CURRENT_DATE + INTERVAL '12 days')
 ON CONFLICT DO NOTHING;

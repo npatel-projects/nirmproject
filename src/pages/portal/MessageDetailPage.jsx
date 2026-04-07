@@ -154,7 +154,7 @@ export default function MessageDetailPage() {
             </div>
             <a
               href={msg.attachment.href}
-              className="text-sm text-blue-600 hover:underline font-medium shrink-0"
+              className="text-sm text-interactive hover:underline font-medium shrink-0"
             >
               Download
             </a>

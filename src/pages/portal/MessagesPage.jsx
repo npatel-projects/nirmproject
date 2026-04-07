@@ -157,7 +157,7 @@ export default function MessagesPage() {
                   onClick={() => setFilter(f)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
                     filter === f
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-interactive text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -184,7 +184,7 @@ export default function MessagesPage() {
               sx={{ width: 200, '& .MuiInputBase-root': { fontSize: '0.8125rem' } }}
             />
             <button
-              className="text-xs text-blue-600 hover:underline whitespace-nowrap"
+              className="text-xs text-interactive hover:underline whitespace-nowrap"
               onClick={() => {}}
             >
               {t('messages.viewArchived')}
@@ -238,11 +238,11 @@ export default function MessagesPage() {
               {/* Title */}
               <div className="flex items-center gap-2 min-w-0">
                 {!msg.read && (
-                  <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-interactive shrink-0" />
                 )}
                 <div className="min-w-0">
                   <button
-                    className="text-sm font-semibold text-blue-600 hover:underline text-left truncate block max-w-full"
+                    className="text-sm font-semibold text-interactive hover:underline text-left truncate block max-w-full"
                     onClick={() => navigate(`/portal/messages/${msg.id}`, { state: { msg } })}
                   >
                     {msg.title}
@@ -279,7 +279,7 @@ export default function MessagesPage() {
                 >
                   {msg.read
                     ? <MarkEmailUnreadOutlinedIcon style={{ fontSize: '1rem', color: '#9ca3af' }} />
-                    : <MarkEmailReadOutlinedIcon style={{ fontSize: '1rem', color: '#3b82f6' }} />
+                    : <MarkEmailReadOutlinedIcon style={{ fontSize: '1rem', color: '#3b5ea6' }} />
                   }
                 </button>
                 <button
@@ -303,7 +303,7 @@ export default function MessagesPage() {
             <button className="px-2.5 py-1 rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40" disabled>
               Previous
             </button>
-            <button className="px-2.5 py-1 rounded border border-gray-200 bg-blue-600 text-white font-medium">
+            <button className="px-2.5 py-1 rounded border border-gray-200 bg-interactive text-white font-medium">
               1
             </button>
             <button className="px-2.5 py-1 rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40" disabled>

@@ -9,12 +9,18 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import CardMembershipOutlinedIcon from '@mui/icons-material/CardMembershipOutlined'
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined'
-import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined'
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined'
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined'
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined'
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import LocalHospitalOutlinedIcon from '@mui/icons-material/LocalHospitalOutlined'
+import MedicationOutlinedIcon from '@mui/icons-material/MedicationOutlined'
+import MedicalServicesOutlinedIcon from '@mui/icons-material/MedicalServicesOutlined'
+import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
 import { colors } from '../../theme'
 import { usePersona } from '../../context/PersonaContext'
 import { generateMemberCertificate } from '../../lib/generateMemberCertificate'
@@ -286,73 +292,170 @@ function BeneficiariesDependentsTab({ memberId }) {
   )
 }
 
-// ─── Benefit type display config ──────────────────────────────────────────────
-const BENEFIT_META = {
-  LIFE:   { label: 'Life Insurance',              iconColor: '#be185d', iconBg: '#fdf2f8' },
-  STD:    { label: 'Short-Term Disability',        iconColor: '#7c3aed', iconBg: '#f5f3ff' },
-  LTD:    { label: 'Long-Term Disability',         iconColor: '#7c3aed', iconBg: '#f5f3ff' },
-  ADD:    { label: 'Accidental Death & Dismem.',   iconColor: '#b45309', iconBg: '#fffbeb' },
-  CI:     { label: 'Critical Illness',             iconColor: '#dc2626', iconBg: '#fef2f2' },
-  HEALTH: { label: 'Extended Health',              iconColor: '#0369a1', iconBg: '#f0f9ff' },
-  DENTAL: { label: 'Dental',                       iconColor: '#0891b2', iconBg: '#ecfeff' },
-  VISION: { label: 'Vision',                       iconColor: '#4f46e5', iconBg: '#eef2ff' },
-  DRUG:   { label: 'Prescription Drug',            iconColor: '#16a34a', iconBg: '#f0fdf4' },
-  HSA:    { label: 'Health Spending Account',      iconColor: '#0d9488', iconBg: '#f0fdfa' },
-  WSA:    { label: 'Wellness Spending Account',    iconColor: '#65a30d', iconBg: '#f7fee7' },
-}
+// ─── Benefit section definitions ──────────────────────────────────────────────
+const BENEFIT_SECTIONS = [
+  { id: 'life',     label: 'Life & Disability',    types: ['LIFE', 'ADD', 'STD', 'LTD', 'CI'], Icon: FavoriteBorderIcon,            color: '#be185d', bg: '#fdf2f8' },
+  { id: 'health',   label: 'Health',               types: ['EHC'],                              Icon: LocalHospitalOutlinedIcon,      color: '#0369a1', bg: '#f0f9ff' },
+  { id: 'drugs',    label: 'Prescription Drugs',   types: ['DRUG'],                             Icon: MedicationOutlinedIcon,         color: '#16a34a', bg: '#f0fdf4' },
+  { id: 'dental',   label: 'Dental',               types: ['DENTAL'],                           Icon: MedicalServicesOutlinedIcon,    color: '#0891b2', bg: '#ecfeff' },
+  { id: 'spending', label: 'Spending Accounts',    types: ['HSA', 'WSA'],                       Icon: AccountBalanceWalletOutlinedIcon,color: '#0d9488', bg: '#f0fdfa' },
+  { id: 'extra',    label: 'Additional Benefits',  types: ['VISION', 'OOC'],                    Icon: StarBorderOutlinedIcon,         color: '#6b7280', bg: '#f3f4f6', hasExtras: true },
+]
 
-function coverageDescription(benefit) {
-  const { coverage_formula, flat_amount, nem_amount, max_amount } = benefit
-  const fmt = (v) => v != null ? formatCurrency(v) : null
+// ─── Shared rendering helpers (member-facing) ─────────────────────────────────
 
-  if (coverage_formula === 'FLAT') return fmt(flat_amount) ?? 'Flat benefit'
-  if (coverage_formula === 'TIMES_SALARY') {
-    const mult = nem_amount != null ? `${nem_amount}× salary` : 'Multiple of salary'
-    return max_amount != null ? `${mult} (max ${fmt(max_amount)})` : mult
-  }
-  if (coverage_formula === 'PERCENT_SALARY') return nem_amount != null ? `${nem_amount}% of salary` : 'Percent of salary'
-  if (coverage_formula === 'PERCENT_EXPENSE') return 'Percent of eligible expenses'
-  if (coverage_formula === 'ACCOUNT_BALANCE') return max_amount != null ? `Up to ${fmt(max_amount)} per year` : 'Spending account balance'
-  return (coverage_formula ?? '').replace(/_/g, ' ')
-}
-
-function BenefitCard({ benefit }) {
-  const meta = BENEFIT_META[benefit.benefit_type] ?? { label: benefit.benefit_type, iconColor: '#6b7280', iconBg: '#f3f4f6' }
+function MemberFieldGrid({ fields }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: meta.iconBg }}>
-          <HealthAndSafetyOutlinedIcon style={{ color: meta.iconColor, fontSize: 18 }} />
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
+      {fields.map((f, i) => (
+        <div key={i}>
+          <p className="text-xs text-gray-400 mb-0.5">{f.label}</p>
+          {Array.isArray(f.values) ? (
+            <ul className="text-sm font-medium text-gray-900 space-y-0.5">
+              {f.values.map((v, j) => (
+                <li key={j} className="flex gap-2">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
+                  {v}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm font-medium text-gray-900 whitespace-pre-line">{f.value ?? '—'}</p>
+          )}
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 leading-snug">{benefit.benefit_name}</p>
-          <p className="text-xs text-gray-400">{meta.label}</p>
+      ))}
+    </div>
+  )
+}
+
+// Shows the enrolled module as a read-only pill (not interactive)
+function MemberEnrolledModulePill({ tierLabel }) {
+  if (!tierLabel) return null
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <span className="text-xs text-gray-400">Your coverage option:</span>
+      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{tierLabel}</span>
+    </div>
+  )
+}
+
+// Renders a non-tiered benefit's display_sections as sub-cards within the section
+function MemberDisplaySections({ sections }) {
+  if (!sections?.length) return null
+
+  const rows = []
+  let i = 0
+  while (i < sections.length) {
+    const s = sections[i]
+    if (s.wide !== false) {
+      // full-width
+      rows.push(
+        <div key={i} className="border border-gray-100 rounded-lg p-4">
+          {s.title && <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{s.title}</p>}
+          <MemberFieldGrid fields={s.fields} />
         </div>
+      )
+      i++
+    } else {
+      // pair narrow sections side-by-side
+      const next = sections[i + 1]?.wide === false ? sections[i + 1] : null
+      rows.push(
+        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="border border-gray-100 rounded-lg p-4">
+            {s.title && <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{s.title}</p>}
+            <MemberFieldGrid fields={s.fields} />
+          </div>
+          {next && (
+            <div className="border border-gray-100 rounded-lg p-4">
+              {next.title && <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{next.title}</p>}
+              <MemberFieldGrid fields={next.fields} />
+            </div>
+          )}
+        </div>
+      )
+      i += next ? 2 : 1
+    }
+  }
+  return <div className="space-y-3">{rows}</div>
+}
+
+// Renders the single tier the member chose for this benefit — no selector.
+// benefitModules is a map of benefit_type → selected tier key,
+// e.g. { "EHC": "Standard", "DENTAL": "Gold", "DRUG": "Basic" }
+function MemberTieredBenefit({ benefit, benefitModules }) {
+  const tiers = benefit.benefit_definition_json?.tiers ?? []
+  if (!tiers.length) return null
+  const selectedKey = benefitModules[benefit.benefit_type]
+  const tier = tiers.find((t) => t.key === selectedKey) ?? tiers[0]
+  return (
+    <div>
+      <MemberEnrolledModulePill tierLabel={tier.key} />
+      <div className="border border-gray-100 rounded-lg p-4 space-y-5">
+        {tier.field_groups.map((group, gi) => (
+          <div key={gi}>
+            {group.title && <p className="text-sm font-semibold text-gray-700 mb-3">{group.title}</p>}
+            <MemberFieldGrid fields={group.fields} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// One section card (e.g. "Life & Disability", "Health", …)
+function MemberBenefitSectionCard({ section, benefits, additionalBenefits, benefitModules }) {
+  const relevant = benefits.filter((b) => section.types.includes(b.benefit_type))
+  const extras   = section.hasExtras ? (additionalBenefits ?? []) : []
+
+  if (relevant.length === 0 && extras.length === 0) return null
+
+  const { Icon, color, bg, label } = section
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      {/* Section header */}
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: bg }}>
+          <Icon style={{ color, fontSize: 18 }} />
+        </div>
+        <h3 className="text-sm font-semibold text-gray-900">{label}</h3>
       </div>
 
-      {/* Coverage amount — prominent */}
-      <div className="bg-gray-50 rounded-lg px-4 py-3">
-        <p className="text-xs text-gray-400 mb-0.5">Your Coverage</p>
-        <p className="text-base font-bold text-gray-900">{coverageDescription(benefit)}</p>
-      </div>
+      <div className="px-5 py-4 space-y-4">
+        {relevant.map((b) => {
+          const tiers = b.benefit_definition_json?.tiers
+          if (tiers?.length) return <MemberTieredBenefit key={b.benefit_id} benefit={b} benefitModules={benefitModules} />
+          const sections = b.benefit_definition_json?.display_sections ?? []
+          if (!sections.length) return null
+          return <MemberDisplaySections key={b.benefit_id} sections={sections} />
+        })}
 
-      {/* Key details */}
-      {benefit.max_amount != null && (
-        <div className="text-xs">
-          <p className="text-gray-400">Maximum</p>
-          <p className="font-medium text-gray-700">{formatCurrency(benefit.max_amount)}</p>
-        </div>
-      )}
+        {/* Plan-level additional_benefits (EAP, Virtual Health Care, etc.) */}
+        {extras.map((ab, i) => (
+          <div key={i} className="border border-gray-100 rounded-lg p-4">
+            {ab.title && <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{ab.title}</p>}
+            <MemberFieldGrid fields={ab.fields ?? []} />
+          </div>
+        ))}
+
+        {/* VISION shown as a plain info block if in the extras section */}
+        {section.id === 'extra' && relevant.filter((b) => b.benefit_type === 'VISION').length > 0 && (
+          <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+            <VisibilityOutlinedIcon style={{ fontSize: 16, color: '#4f46e5' }} />
+            <p className="text-xs text-gray-500">Vision Care is included in your plan — see plan documents for limits.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
 // ─── Plan Summary tab ─────────────────────────────────────────────────────────
 function PlanSummaryTab({ emp }) {
-  const member = emp.member?.find((m) => m.member_status === 'ACTIVE') ?? null
-  const assignment = emp.employee_plan_assignment?.[0] ?? null
-  const plan = member?.plan ?? assignment?.plan ?? null
+  const member         = emp.member?.find((m) => m.member_status === 'ACTIVE') ?? null
+  const assignment     = emp.employee_plan_assignment?.[0] ?? null
+  const plan           = member?.plan ?? assignment?.plan ?? null
+  const benefitModules = member?.benefit_modules ?? {}
 
   const [benefits, setBenefits] = useState([])
   const [loadingBenefits, setLoadingBenefits] = useState(false)
@@ -362,7 +465,7 @@ function PlanSummaryTab({ emp }) {
     setLoadingBenefits(true)
     supabase
       .from('benefit')
-      .select('benefit_id, benefit_name, benefit_type, coverage_formula, flat_amount, nem_amount, max_amount, waiting_period_days')
+      .select('benefit_id, benefit_name, benefit_type, benefit_definition_json')
       .eq('plan_id', plan.plan_id)
       .eq('is_active', true)
       .order('benefit_type')
@@ -372,36 +475,48 @@ function PlanSummaryTab({ emp }) {
       })
   }, [plan?.plan_id])
 
-  if (!plan) {
-    return <p className="text-sm text-gray-400 py-6">No plan information available.</p>
-  }
+  if (!plan) return <p className="text-sm text-gray-400 py-6">No plan information available.</p>
+
+  const additionalBenefits = plan.plan_definition_json?.additional_benefits ?? []
+
+  const visibleSections = BENEFIT_SECTIONS.filter((s) => {
+    if (s.hasExtras && additionalBenefits.length > 0) return true
+    return benefits.some((b) => s.types.includes(b.benefit_type))
+  })
 
   return (
     <>
       <SectionCard title="Plan Information">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-5">
-          <InfoRow label="Plan Name" value={plan.plan_name} />
-          <InfoRow label="Plan Code" value={plan.plan_code} />
-          <InfoRow label="Member Number" value={member?.member_number} />
+          <InfoRow label="Plan Name"      value={plan.plan_name} />
+          <InfoRow label="Plan Type"      value={plan.plan_type} />
+          <InfoRow label="Member Number"  value={member?.member_number} />
           <InfoRow label="Effective Date" value={formatDate(member?.effective_date)} />
-          <InfoRow label="Class" value={assignment?.class_code} />
-          <InfoRow label="Division" value={assignment?.division_code} />
+          <InfoRow label="Class"          value={assignment?.class_code} />
+          <InfoRow label="Division"       value={assignment?.division_code} />
         </div>
       </SectionCard>
 
-      {/* Benefits summary */}
-      <div className="mb-2">
-        <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">Your Benefits</p>
-        {loadingBenefits ? (
-          <p className="text-sm text-gray-400">Loading benefits...</p>
-        ) : benefits.length === 0 ? (
-          <p className="text-sm text-gray-400">No benefits configured for this plan.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {benefits.map((b) => <BenefitCard key={b.benefit_id} benefit={b} />)}
-          </div>
-        )}
-      </div>
+      <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">Your Benefits</p>
+
+      {loadingBenefits ? (
+        <p className="text-sm text-gray-400">Loading benefits...</p>
+      ) : (
+        <div className="space-y-4">
+          {visibleSections.map((s) => (
+            <MemberBenefitSectionCard
+              key={s.id}
+              section={s}
+              benefits={benefits}
+              additionalBenefits={additionalBenefits}
+              benefitModules={benefitModules}
+            />
+          ))}
+          {visibleSections.length === 0 && (
+            <p className="text-sm text-gray-400">No benefits configured for this plan.</p>
+          )}
+        </div>
+      )}
     </>
   )
 }
@@ -433,11 +548,11 @@ export default function EmployeeDetailPage() {
           province_state_code, email, phone_mobile, job_title,
           employee_plan_assignment (
             class_code, division_code, status, effective_date,
-            plan ( plan_id, plan_name, plan_code, status )
+            plan ( plan_id, plan_name, plan_code, plan_type, status, plan_definition_json )
           ),
           member (
-            member_id, member_number, member_status, effective_date,
-            plan ( plan_id, plan_name, plan_code )
+            member_id, member_number, member_status, effective_date, benefit_modules,
+            plan ( plan_id, plan_name, plan_code, plan_type, plan_definition_json )
           )
         `)
         .eq('employee_id', employeeId)
