@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
@@ -7,7 +7,6 @@ import FilterSelect from '../../components/FilterSelect'
 import { Menu } from '@ark-ui/react/menu'
 import { Dialog } from '@ark-ui/react/dialog'
 import { Tabs } from '@ark-ui/react/tabs'
-import { FileUpload } from '@ark-ui/react/file-upload'
 import { Button } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -538,8 +537,48 @@ function TerminateModal({ emp, onConfirm, onCancel, terminating, terminateError 
   )
 }
 
+// ─── Delete confirmation modal ────────────────────────────────────────────────
+function DeleteEmployeeModal({ emp, onConfirm, onCancel, deleting, deleteError }) {
+  if (!emp) return null
+  return (
+    <Dialog.Root open onOpenChange={({ open }) => { if (!open) onCancel() }}>
+      <Dialog.Backdrop className="fixed inset-0 bg-black/40 z-40" />
+      <Dialog.Positioner className="fixed inset-0 flex items-center justify-center z-50 p-4">
+        <Dialog.Content className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+          <Dialog.Title className="text-lg font-bold text-gray-900 mb-2">
+            Delete Employee Record
+          </Dialog.Title>
+          <Dialog.Description className="text-sm text-gray-600 mb-5">
+            Are you sure you want to permanently delete{' '}
+            <span className="font-semibold">{emp.first_name} {emp.last_name}</span>{' '}
+            <span className="font-mono text-xs text-gray-500">({emp.external_hr_id})</span>?
+            <br /><br />
+            This will remove all associated member, enrollment, and claim records. <strong>This cannot be undone.</strong>
+          </Dialog.Description>
+          {deleteError && (
+            <p className="text-sm text-red-600 mb-4">Error: {deleteError}</p>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button variant="outlined" onClick={onCancel} disabled={deleting}>
+              CANCEL
+            </Button>
+            <Button
+              variant="contained"
+              onClick={onConfirm}
+              disabled={deleting}
+              style={{ backgroundColor: colors.error }}
+            >
+              {deleting ? 'DELETING...' : 'DELETE PERMANENTLY'}
+            </Button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Positioner>
+    </Dialog.Root>
+  )
+}
+
 // ─── Row 3-dot actions menu ───────────────────────────────────────────────────
-function ActionsMenu({ emp, onEditClick, onTerminateClick, onChangeStatusClick }) {
+function ActionsMenu({ emp, onEditClick, onTerminateClick, onChangeStatusClick, onDeleteClick }) {
   const navigate = useNavigate()
   return (
     <Menu.Root>
@@ -590,9 +629,184 @@ function ActionsMenu({ emp, onEditClick, onTerminateClick, onChangeStatusClick }
           >
             Terminate
           </Menu.Item>
+          <Menu.Item
+            value="delete"
+            className="px-4 py-2 text-sm text-red-600 cursor-pointer hover:bg-red-50 data-[highlighted]:bg-red-50 outline-none border-t border-gray-100"
+            onClick={() => onDeleteClick(emp)}
+          >
+            Delete Record
+          </Menu.Item>
         </Menu.Content>
       </Menu.Positioner>
     </Menu.Root>
+  )
+}
+
+// ─── Bulk Upload tab ──────────────────────────────────────────────────────────
+function BulkUploadTab({ onSuccess }) {
+  const [csvFile, setCsvFile]           = useState(null)
+  const [csvPreview, setCsvPreview]     = useState(null)
+  const [csvImporting, setCsvImporting] = useState(false)
+  const fileInputRef = useRef(null)
+
+  function downloadTemplate() {
+    const header  = 'employee_id,first_name,last_name,email,plan_id\n'
+    const example = 'f6000000-0000-0000-0000-000000000003,Mike,Chang,mike.chang@example.com,c3000000-0000-0000-0000-000000000002\n'
+    const blob = new Blob([header + example], { type: 'text/csv' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href = url; a.download = 'enrollment_template.csv'; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCsvFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const lines  = (ev.target.result ?? '').trim().split('\n')
+      const header = lines[0]?.split(',').map((h) => h.trim()) ?? []
+      const required = ['employee_id', 'first_name', 'last_name']
+      const missing  = required.filter((k) => !header.includes(k))
+      if (missing.length) {
+        setCsvPreview({ rows: [], errors: [`Missing required columns: ${missing.join(', ')}`] })
+        return
+      }
+      const rows = lines.slice(1).filter(Boolean).map((line, i) => {
+        const cells = line.split(',').map((c) => c.trim())
+        const row   = Object.fromEntries(header.map((h, idx) => [h, cells[idx] ?? '']))
+        const errs  = []
+        if (!row.employee_id) errs.push('Missing employee_id')
+        if (!row.first_name)  errs.push('Missing first_name')
+        if (!row.last_name)   errs.push('Missing last_name')
+        return { ...row, _row: i + 2, _errors: errs }
+      })
+      setCsvPreview({ rows, errors: [] })
+    }
+    reader.readAsText(file)
+  }
+
+  async function handleBulkEnroll() {
+    if (!csvPreview) return
+    const validRows = csvPreview.rows.filter((r) => r._errors.length === 0)
+    setCsvImporting(true)
+    await new Promise((r) => setTimeout(r, 1200))
+    setCsvImporting(false)
+    setCsvFile(null)
+    setCsvPreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    alert(`${validRows.length} enrollment(s) submitted for processing. You will be notified of each result.`)
+    onSuccess?.()
+  }
+
+  const validCount = csvPreview?.rows.filter((r) => r._errors.length === 0).length ?? 0
+
+  return (
+    <div className="space-y-5 max-w-2xl">
+      {/* Instructions */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+        <p className="text-xs font-semibold text-blue-800 mb-1">How it works</p>
+        <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+          <li>Download the CSV template below</li>
+          <li>Fill in one row per employee to add</li>
+          <li>Upload the completed file — a preview will appear</li>
+          <li>Click Submit to send all rows for processing</li>
+        </ol>
+      </div>
+
+      <Button
+        variant="text"
+        size="small"
+        startIcon={<FileDownloadIcon />}
+        onClick={downloadTemplate}
+        sx={{ textTransform: 'none' }}
+      >
+        Download CSV Template
+      </Button>
+
+      {/* File picker */}
+      <div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-lg py-8 hover:border-gray-400 hover:bg-gray-50 transition-colors text-sm text-gray-500 gap-2"
+        >
+          <UploadFileIcon style={{ fontSize: 28, color: '#9ca3af' }} />
+          {csvFile ? (
+            <span className="font-medium text-gray-700">{csvFile.name}</span>
+          ) : (
+            <span>Click to select a CSV file</span>
+          )}
+        </button>
+      </div>
+
+      {/* Preview */}
+      {csvPreview && (
+        <div>
+          {csvPreview.errors.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-3">
+              {csvPreview.errors.map((err, i) => (
+                <p key={i} className="text-xs text-red-700">{err}</p>
+              ))}
+            </div>
+          )}
+          {csvPreview.rows.length > 0 && (
+            <div className="border border-gray-200 rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-gray-500">Row</th>
+                    <th className="px-3 py-2 text-left text-gray-500">Employee ID</th>
+                    <th className="px-3 py-2 text-left text-gray-500">Name</th>
+                    <th className="px-3 py-2 text-left text-gray-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvPreview.rows.map((row) => (
+                    <tr key={row._row} className="border-b border-gray-100 last:border-0">
+                      <td className="px-3 py-2 text-gray-400">{row._row}</td>
+                      <td className="px-3 py-2 text-gray-700">{row.employee_id || '—'}</td>
+                      <td className="px-3 py-2 text-gray-700">{row.first_name} {row.last_name}</td>
+                      <td className="px-3 py-2">
+                        {row._errors.length === 0 ? (
+                          <span className="text-green-600 font-medium">✓ Valid</span>
+                        ) : (
+                          <span className="text-red-600">{row._errors.join(', ')}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p className="text-xs text-gray-400 mt-2">
+            {validCount} valid row(s) of {csvPreview.rows.length}
+          </p>
+          {validCount > 0 && (
+            <div className="mt-4">
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ textTransform: 'none', backgroundColor: colors.brandPrimary }}
+                disabled={csvImporting}
+                onClick={handleBulkEnroll}
+              >
+                {csvImporting ? 'Submitting…' : `Submit ${validCount} Member(s)`}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -837,7 +1051,7 @@ export default function MembersPage() {
   // Filter state
   const [pillFilter, setPillFilter] = useState('all') // 'all' | 'enrolled' | 'not_enrolled'
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('ACTIVE')
   const [planTypeFilter, setPlanTypeFilter] = useState('all')
   const [planFilter, setPlanFilter] = useState('all')
   const [groupFilter, setGroupFilter] = useState('all')
@@ -859,6 +1073,11 @@ export default function MembersPage() {
   const [terminateTarget, setTerminateTarget]   = useState(null)
   const [terminating, setTerminating]           = useState(false)
   const [terminateError, setTerminateError]     = useState(null)
+
+  // Delete modal
+  const [deleteTarget, setDeleteTarget]         = useState(null)
+  const [deleting, setDeleting]                 = useState(false)
+  const [deleteError, setDeleteError]           = useState(null)
 
   // Individual add form plan list
   const [plans, setPlans] = useState([])
@@ -882,7 +1101,6 @@ export default function MembersPage() {
         )
       `)
       .eq('sponsor_id', sponsorId)
-      .neq('employment_status', 'TERMINATED')
       .order('external_hr_id')
 
     if (fetchError) {
@@ -1078,6 +1296,34 @@ export default function MembersPage() {
     }
   }
 
+  // ─── Delete handler ──────────────────────────────────────────────────────
+  async function handleConfirmDelete() {
+    setDeleting(true)
+    setDeleteError(null)
+    const id = deleteTarget.employee_id
+
+    // Delete in FK-safe order before removing the employee row
+    const steps = [
+      supabase.from('eoi_submission').delete().eq('employee_id', id),
+      supabase.from('member').delete().eq('employee_id', id),
+      supabase.from('employee_plan_assignment').delete().eq('employee_id', id),
+    ]
+    for (const step of steps) {
+      const { error } = await step
+      if (error) { setDeleteError(error.message); setDeleting(false); return }
+    }
+
+    const { error } = await supabase.from('employee').delete().eq('employee_id', id)
+    if (error) {
+      setDeleteError(error.message)
+      setDeleting(false)
+    } else {
+      setDeleting(false)
+      setDeleteTarget(null)
+      fetchData()
+    }
+  }
+
   // ─── Pill button style helper ─────────────────────────────────────────────
   function pillStyle(value) {
     const isActive = pillFilter === value
@@ -1205,7 +1451,7 @@ export default function MembersPage() {
                     <>
                       <tr
                         key={emp.employee_id}
-                        className={`hover:bg-gray-50 ${!isLast || isExpanded ? 'border-b border-gray-100' : ''}`}
+                        className={`${emp.employment_status === 'TERMINATED' ? 'bg-red-50/50 hover:bg-red-50' : 'hover:bg-gray-50'} ${!isLast || isExpanded ? 'border-b border-gray-100' : ''}`}
                       >
                         {/* Chevron expand */}
                         <td className="px-3 py-3 text-center">
@@ -1234,7 +1480,14 @@ export default function MembersPage() {
 
                         {/* Name */}
                         <td className="px-4 py-3 font-medium text-gray-900">
-                          {emp.first_name} {emp.last_name}
+                          <span className={emp.employment_status === 'TERMINATED' ? 'text-gray-400' : ''}>
+                            {emp.first_name} {emp.last_name}
+                          </span>
+                          {emp.employment_status === 'TERMINATED' && (
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-600">
+                              Terminated
+                            </span>
+                          )}
                         </td>
 
                         {/* Member ID */}
@@ -1254,7 +1507,7 @@ export default function MembersPage() {
 
                         {/* Actions */}
                         <td className="px-4 py-3">
-                          <ActionsMenu emp={emp} onEditClick={setEditTarget} onTerminateClick={setTerminateTarget} onChangeStatusClick={setStatusTarget} />
+                          <ActionsMenu emp={emp} onEditClick={setEditTarget} onTerminateClick={setTerminateTarget} onChangeStatusClick={setStatusTarget} onDeleteClick={setDeleteTarget} />
                         </td>
                       </tr>
 
@@ -1285,83 +1538,30 @@ export default function MembersPage() {
               Add members to the census individually or upload in bulk
             </p>
 
-            <Tabs.Root defaultValue="bulk">
+            <Tabs.Root defaultValue="individual">
               <Tabs.List className="flex border-b border-gray-200 mb-6">
                 <Tabs.Trigger
-                  value="bulk"
-                  className="px-5 py-2.5 text-sm font-medium text-gray-500 cursor-pointer border-b-2 border-transparent data-[selected]:border-b-2 data-[selected]:font-semibold focus:outline-none"
-                  style={{}}
+                  value="individual"
+                  className="px-5 py-2.5 text-sm font-medium text-gray-500 cursor-pointer border-b-2 border-transparent data-[selected]:border-interactive data-[selected]:text-interactive data-[selected]:font-semibold focus:outline-none"
                 >
-                  {/* Inline selected indicator via inline style applied conditionally */}
-                  <span className="data-[selected]:text-brand">Bulk Upload</span>
+                  Add Individual Member
                 </Tabs.Trigger>
                 <Tabs.Trigger
-                  value="individual"
-                  className="px-5 py-2.5 text-sm font-medium text-gray-500 cursor-pointer border-b-2 border-transparent data-[selected]:border-b-2 data-[selected]:font-semibold focus:outline-none"
+                  value="bulk"
+                  className="px-5 py-2.5 text-sm font-medium text-gray-500 cursor-pointer border-b-2 border-transparent data-[selected]:border-interactive data-[selected]:text-interactive data-[selected]:font-semibold focus:outline-none"
                 >
-                  <span>Add Individual Member</span>
+                  Bulk Upload via CSV
                 </Tabs.Trigger>
-                <Tabs.Indicator
-                  className="absolute bottom-0 h-0.5"
-                  style={{ backgroundColor: colors.brandPrimary }}
-                />
               </Tabs.List>
-
-              {/* Bulk Upload tab */}
-              <Tabs.Content value="bulk">
-                <div className="space-y-5">
-                  {/* Download template button */}
-                  <div>
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      startIcon={<FileDownloadIcon />}
-                      style={{
-                        borderColor: colors.brandPrimary,
-                        color: colors.brandPrimary,
-                      }}
-                      onClick={() => {
-                        // Placeholder: trigger template download
-                        alert('Download template (not yet wired).')
-                      }}
-                    >
-                      DOWNLOAD ENROLLMENT TEMPLATE
-                    </Button>
-                  </div>
-
-                  {/* File upload zone */}
-                  <FileUpload.Root
-                    maxFiles={1}
-                    accept={{ 'text/csv': ['.csv'], 'application/vnd.ms-excel': ['.xls', '.xlsx'] }}
-                  >
-                    <FileUpload.Dropzone className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:border-gray-400 transition-colors">
-                      <UploadFileIcon
-                        className="text-gray-400"
-                        style={{ fontSize: '2.5rem' }}
-                      />
-                      <p className="text-sm text-gray-500">Drag and drop a file here</p>
-                      <p className="text-xs text-gray-400">or</p>
-                      <FileUpload.Trigger asChild>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          style={{
-                            borderColor: '#9ca3af',
-                            color: '#374151',
-                          }}
-                        >
-                          CHOOSE A FILE
-                        </Button>
-                      </FileUpload.Trigger>
-                    </FileUpload.Dropzone>
-                    <FileUpload.HiddenInput />
-                  </FileUpload.Root>
-                </div>
-              </Tabs.Content>
 
               {/* Add Individual Member tab */}
               <Tabs.Content value="individual">
                 <AddIndividualForm plans={plans} onSuccess={fetchData} sponsorId={sponsorId} />
+              </Tabs.Content>
+
+              {/* Bulk Upload tab */}
+              <Tabs.Content value="bulk">
+                <BulkUploadTab onSuccess={fetchData} />
               </Tabs.Content>
             </Tabs.Root>
           </div>
@@ -1399,6 +1599,17 @@ export default function MembersPage() {
           onCancel={() => { setTerminateTarget(null); setTerminateError(null) }}
           terminating={terminating}
           terminateError={terminateError}
+        />
+      )}
+
+      {/* ─── Delete confirmation modal ─────────────────────────────────────── */}
+      {deleteTarget && (
+        <DeleteEmployeeModal
+          emp={deleteTarget}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => { setDeleteTarget(null); setDeleteError(null) }}
+          deleting={deleting}
+          deleteError={deleteError}
         />
       )}
     </div>

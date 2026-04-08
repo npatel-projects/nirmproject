@@ -17,11 +17,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface EnrollmentRequest {
-  employee_id:    string
-  sponsor_id:     string
-  plan_id:        string
-  form_data:      Record<string, unknown>  // raw form field values keyed by field ID
-  submitted_by:   string                   // user_id or persona label
+  employee_id:     string
+  sponsor_id:      string
+  plan_id:         string
+  form_data:       Record<string, unknown>  // raw form field values keyed by field ID
+  benefit_modules: Record<string, string>   // { EHC: 'Standard', DENTAL: 'Premium', ... }
+  submitted_by:    string                   // user_id or persona label
 }
 
 type PasStatus =
@@ -131,7 +132,7 @@ Deno.serve(async (req) => {
 
   try {
     const body: EnrollmentRequest = await req.json()
-    const { employee_id, sponsor_id, plan_id, form_data, submitted_by } = body
+    const { employee_id, sponsor_id, plan_id, form_data, benefit_modules, submitted_by } = body
 
     if (!employee_id || !sponsor_id || !plan_id) {
       return Response.json({ error: 'employee_id, sponsor_id, and plan_id are required' }, { status: 400 })
@@ -189,9 +190,10 @@ Deno.serve(async (req) => {
         .insert({
           employee_id,
           plan_id,
-          member_number:  result.member_number,
-          member_status:  'ACTIVE',
-          effective_date: new Date().toISOString().split('T')[0],
+          member_number:   result.member_number,
+          member_status:   'ACTIVE',
+          effective_date:  new Date().toISOString().split('T')[0],
+          benefit_modules: benefit_modules ?? {},
         })
 
       if (memberErr) {

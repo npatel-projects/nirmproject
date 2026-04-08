@@ -16,6 +16,9 @@ import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 import FolderSharedOutlinedIcon from '@mui/icons-material/FolderSharedOutlined'
+import AssignmentLateOutlinedIcon from '@mui/icons-material/AssignmentLateOutlined'
+import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined'
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'
 
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
@@ -75,10 +78,34 @@ export default function PortalLayout() {
             </NavLink>
           )}
           {can('members') && (
-            <NavLink to="/portal/members" className={navLinkClass}>
-              <PeopleAltOutlinedIcon fontSize="small" className="shrink-0" />
-              <span className="hidden md:inline">Members</span>
-            </NavLink>
+            <Accordion.Root defaultValue={['members-group']} collapsible>
+              <Accordion.Item value="members-group">
+                <Accordion.ItemTrigger className="flex items-center justify-between w-full px-3 py-2 rounded text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer text-left">
+                  <span className="flex items-center gap-2">
+                    <PeopleAltOutlinedIcon fontSize="small" className="text-gray-500 shrink-0" />
+                    <span className="hidden md:inline">Members</span>
+                  </span>
+                  <Accordion.ItemIndicator className="hidden md:flex">
+                    <ChevronRightIcon
+                      fontSize="small"
+                      className="text-gray-400 transition-transform duration-200 [[data-state=open]_&]:rotate-90"
+                    />
+                  </Accordion.ItemIndicator>
+                </Accordion.ItemTrigger>
+                <Accordion.ItemContent className="pl-4 mt-1 space-y-1 hidden md:block">
+                  <NavLink to="/portal/members" className={navLinkClass}>
+                    <PeopleAltOutlinedIcon fontSize="small" className="shrink-0" />
+                    <span className="hidden md:inline">All Members</span>
+                  </NavLink>
+                  {can('enrollment') && (
+                    <NavLink to="/portal/enrollment" className={navLinkClass}>
+                      <AssignmentLateOutlinedIcon fontSize="small" className="shrink-0" />
+                      <span className="hidden md:inline">Enrollment & EOI</span>
+                    </NavLink>
+                  )}
+                </Accordion.ItemContent>
+              </Accordion.Item>
+            </Accordion.Root>
           )}
           {can('claims') && isEnrolled && (
             <NavLink to="/portal/claims" className={navLinkClass}>
@@ -114,6 +141,18 @@ export default function PortalLayout() {
             <NavLink to="/portal/broker/groups" className={navLinkClass}>
               <FolderSharedOutlinedIcon fontSize="small" className="shrink-0" />
               <span className="hidden md:inline">My Groups</span>
+            </NavLink>
+          )}
+          {can('account') && (
+            <NavLink to="/portal/account" className={navLinkClass}>
+              <ManageAccountsOutlinedIcon fontSize="small" className="shrink-0" />
+              <span className="hidden md:inline">Account</span>
+            </NavLink>
+          )}
+          {can('notifications') && (
+            <NavLink to="/portal/notifications" className={navLinkClass}>
+              <NotificationsOutlinedIcon fontSize="small" className="shrink-0" />
+              <span className="hidden md:inline">Notifications</span>
             </NavLink>
           )}
         </nav>

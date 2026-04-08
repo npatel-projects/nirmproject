@@ -207,7 +207,8 @@ export default function EnrollmentPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const [empRes, tplRes] = await Promise.all([
+      // Fetch employee + plan assignment in parallel
+      const [empRes, assignRes] = await Promise.all([
         supabase
           .from('employee')
           .select(`
@@ -218,22 +219,46 @@ export default function EnrollmentPage() {
           .eq('employee_id', employeeId)
           .single(),
         supabase
+          .from('employee_plan_assignment')
+          .select('plan_id')
+          .eq('employee_id', employeeId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single(),
+      ])
+
+      if (empRes.error) { setError(empRes.error.message); setLoading(false); return }
+
+      const emp    = empRes.data
+      const planId = assignRes.data?.plan_id ?? null
+
+      // Prefer plan-specific template; fall back to global sponsor template
+      let tplData = null
+      if (planId) {
+        const { data } = await supabase
+          .from('enrollment_form_template')
+          .select('form_config')
+          .eq('sponsor_id', sponsorId)
+          .eq('plan_id', planId)
+          .eq('is_active', true)
+          .single()
+        tplData = data
+      }
+
+      if (!tplData) {
+        const { data, error: tplErr } = await supabase
           .from('enrollment_form_template')
           .select('form_config')
           .eq('sponsor_id', sponsorId)
           .eq('is_active', true)
           .is('plan_id', null)
-          .single(),
-      ])
+          .single()
+        if (tplErr) { setError(tplErr.message); setLoading(false); return }
+        tplData = data
+      }
 
-      if (empRes.error)  { setError(empRes.error.message);  setLoading(false); return }
-      if (tplRes.error)  { setError(tplRes.error.message);  setLoading(false); return }
-
-      const emp = empRes.data
       setEmp(emp)
-      setTemplate(tplRes.data.form_config)
-
-      // Pre-fill known values from employee record
+      setTemplate(tplData.form_config)
       setValues(buildPrefill(emp))
       setLoading(false)
     }
@@ -314,14 +339,24 @@ export default function EnrollmentPage() {
       return
     }
 
+    // Extract module_<BENEFIT_TYPE> fields into a benefit_modules map
+    // e.g. { module_EHC: 'Standard', module_DENTAL: 'Premium' }
+    //   → { EHC: 'Standard', DENTAL: 'Premium' }
+    const benefit_modules = Object.fromEntries(
+      Object.entries(values)
+        .filter(([key]) => key.startsWith('module_'))
+        .map(([key, val]) => [key.replace('module_', ''), val])
+    )
+
     try {
       const { data, error } = await supabase.functions.invoke('pas-enrollment-adapter', {
         body: {
-          employee_id:  employeeId,
-          sponsor_id:   sponsorId,
-          plan_id:      planId,
-          form_data:    values,
-          submitted_by: 'portal',
+          employee_id:    employeeId,
+          sponsor_id:     sponsorId,
+          plan_id:        planId,
+          form_data:      values,
+          benefit_modules,
+          submitted_by:   'portal',
         },
       })
 

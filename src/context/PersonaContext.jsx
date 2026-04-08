@@ -7,7 +7,7 @@ export const PERSONAS = {
     label:         'Sponsor',
     description:   'Full access to all portal features',
     initials:      'SP',
-    allowedRoutes: ['contracts', 'plans', 'members', 'member-profile', 'analytics', 'contacts', 'claims', 'requests', 'messages'],
+    allowedRoutes: ['contracts', 'plans', 'members', 'member-profile', 'analytics', 'contacts', 'claims', 'requests', 'messages', 'enrollment', 'account'],
     defaultRoute:  '/portal/contracts',
   },
   BROKER: {
@@ -23,7 +23,7 @@ export const PERSONAS = {
     label:         'Member',
     description:   'Access to member profile, claims and contacts',
     initials:      'MB',
-    allowedRoutes: ['member-profile', 'claims', 'contacts', 'my-card', 'my-benefits', 'requests', 'messages'],
+    allowedRoutes: ['member-profile', 'claims', 'contacts', 'my-card', 'my-benefits', 'requests', 'messages', 'notifications'],
     defaultRoute:  '/portal/claims',
   },
 }

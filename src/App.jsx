@@ -7,6 +7,7 @@ import PlanDetailPage from './pages/portal/PlanDetailPage'
 import MembersPage from './pages/portal/MembersPage'
 import EmployeeDetailPage from './pages/portal/EmployeeDetailPage'
 import EnrollmentPage from './pages/portal/EnrollmentPage'
+import EnrollmentDashboardPage from './pages/portal/EnrollmentDashboardPage'
 import ClaimsPage from './pages/portal/ClaimsPage'
 import ClaimDetailPage from './pages/portal/ClaimDetailPage'
 import CreateClaimPage from './pages/portal/CreateClaimPage'
@@ -19,6 +20,8 @@ import AnalyticsPage from './pages/portal/AnalyticsPage'
 import MyGroupsPage from './pages/portal/MyGroupsPage'
 import MessagesPage from './pages/portal/MessagesPage'
 import MessageDetailPage from './pages/portal/MessageDetailPage'
+import AccountPage from './pages/portal/AccountPage'
+import NotificationPreferencesPage from './pages/portal/NotificationPreferencesPage'
 import TestPage from './pages/portal/TestPage'
 import PersonaGuard from './components/PersonaGuard'
 import AuthGuard from './components/AuthGuard'
@@ -48,6 +51,7 @@ export default function App() {
           <Route path="members" element={<PersonaGuard route="members"><MembersPage /></PersonaGuard>} />
           <Route path="members/:employeeId" element={<PersonaGuard route="member-profile"><EmployeeDetailPage /></PersonaGuard>} />
           <Route path="members/:employeeId/enroll" element={<PersonaGuard route="member-profile"><EnrollmentPage /></PersonaGuard>} />
+          <Route path="enrollment" element={<PersonaGuard route="enrollment"><EnrollmentDashboardPage /></PersonaGuard>} />
           <Route path="claims" element={<PersonaGuard route="claims"><ClaimsPage /></PersonaGuard>} />
           <Route path="claims/new" element={<PersonaGuard route="claims"><CreateClaimPage /></PersonaGuard>} />
           <Route path="claims/:claimId" element={<PersonaGuard route="claims"><ClaimDetailPage /></PersonaGuard>} />
@@ -60,6 +64,8 @@ export default function App() {
           <Route path="broker/groups" element={<PersonaGuard route="broker-groups"><MyGroupsPage /></PersonaGuard>} />
           <Route path="messages" element={<PersonaGuard route="messages"><MessagesPage /></PersonaGuard>} />
           <Route path="messages/:messageId" element={<PersonaGuard route="messages"><MessageDetailPage /></PersonaGuard>} />
+          <Route path="account" element={<PersonaGuard route="account"><AccountPage /></PersonaGuard>} />
+          <Route path="notifications" element={<PersonaGuard route="notifications"><NotificationPreferencesPage /></PersonaGuard>} />
           <Route path="test" element={<TestPage />} />
         </Route>
       </Routes>
