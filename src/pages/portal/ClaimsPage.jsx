@@ -61,7 +61,7 @@ function Th({ children, col, sortCol, sortDir, onSort }) {
   const active = sortCol === col
   return (
     <th
-      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide cursor-pointer select-none whitespace-nowrap"
+      className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap"
       onClick={() => onSort(col)}
     >
       <span className="flex items-center gap-1">
@@ -134,9 +134,9 @@ function InProgressTab({ claims, onDeleted }) {
   return (
     <>
       <p className="text-sm text-gray-500 mb-4">Click on a claim number to see more details</p>
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+          <thead className="border-b border-gray-200">
             <tr>
               <Th col="claim_number"    sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Claim Number</Th>
               <Th col="submission_date" sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Submitted Date</Th>
@@ -144,10 +144,10 @@ function InProgressTab({ claims, onDeleted }) {
               <Th col="typeLabel"       sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Type</Th>
               <Th col="amount_claimed"  sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Amount</Th>
               <Th col="status"          sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Status</Th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Actions</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-gray-100">
             {sorted.length === 0 ? (
               <EmptyState message="No in-progress claims" />
             ) : sorted.map((c) => (
@@ -204,9 +204,9 @@ function CompletedTab({ claims }) {
       <p className="text-sm text-gray-500 mb-4">
         Showing approved, partially approved, declined, and closed claims
       </p>
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+          <thead className="border-b border-gray-200">
             <tr>
               <Th col="paid_date"    sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Date</Th>
               <Th col="typeLabel"    sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Benefit Type</Th>
@@ -217,7 +217,7 @@ function CompletedTab({ claims }) {
               <Th col="status"       sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Status</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-gray-100">
             {sorted.length === 0 ? (
               <EmptyState message="No completed claims" />
             ) : sorted.map((c) => (
@@ -256,9 +256,9 @@ function EstimatesTab({ estimates }) {
         Dental estimates are pre-approved based on the benefit plan and claims information on record.
         The claimant must be covered at the time of treatment.
       </p>
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+          <thead className="border-b border-gray-200">
             <tr>
               <Th col="statement_date"  sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Date of Statement</Th>
               <Th col="typeLabel"       sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Benefit Type</Th>
@@ -268,7 +268,7 @@ function EstimatesTab({ estimates }) {
               <Th col="payable_amount"  sortCol={sortCol} sortDir={sortDir} onSort={onSort}>Payable by Plan</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-gray-100">
             {sorted.length === 0 ? (
               <EmptyState message="No dental estimates" />
             ) : sorted.map((e) => (

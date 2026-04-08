@@ -125,8 +125,8 @@ export default function ContractDetailPage() {
         </div>
 
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100">
+          <thead className="border-b border-gray-200">
+            <tr>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Document Type</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Event</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Effective Date</th>

@@ -1,5 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Menu } from '@ark-ui/react/menu'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
 import { Tabs } from '@ark-ui/react/tabs'
@@ -143,7 +145,7 @@ function EnrollmentTab({ sponsorId }) {
             placeholder="Search employees…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 w-56"
+            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 bg-white w-56"
           />
         </div>
 
@@ -184,7 +186,7 @@ function EnrollmentTab({ sponsorId }) {
               {filtered.map((e, i) => (
                 <tr
                   key={e.employee_id}
-                  className={`${i < filtered.length - 1 ? 'border-b border-gray-100' : ''} ${e.isOverdue ? 'bg-red-50/40' : ''}`}
+                  className={i < filtered.length - 1 ? 'border-b border-gray-100' : ''}
                 >
                   <td className="px-5 py-3">
                     <p
@@ -197,52 +199,61 @@ function EnrollmentTab({ sponsorId }) {
                   </td>
                   <td className="px-5 py-3 text-gray-600">{e.planName}</td>
                   <td className="px-5 py-3 text-gray-600">{formatDate(e.hire_date)}</td>
-                  <td className="px-5 py-3">
-                    {e.daysSinceHire != null ? (
-                      <span className={e.isOverdue ? 'text-red-600 font-semibold' : 'text-gray-600'}>
-                        {e.daysSinceHire}d {e.isOverdue && '⚠'}
-                      </span>
-                    ) : '—'}
+                  <td className="px-5 py-3 text-gray-600">
+                    {e.daysSinceHire != null ? `${e.daysSinceHire}d` : '—'}
                   </td>
                   <td className="px-5 py-3">
                     {e.isEnrolled ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-50 text-green-700">
                         <CheckCircleOutlineIcon style={{ fontSize: 12 }} /> Enrolled
                       </span>
+                    ) : e.isOverdue ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-500">
+                        <HourglassEmptyOutlinedIcon style={{ fontSize: 12 }} /> Overdue
+                      </span>
                     ) : (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold ${e.isOverdue ? 'bg-red-100 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
-                        <HourglassEmptyOutlinedIcon style={{ fontSize: 12 }} /> {e.isOverdue ? 'Overdue' : 'Pending'}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600">
+                        <HourglassEmptyOutlinedIcon style={{ fontSize: 12 }} /> Pending
                       </span>
                     )}
                   </td>
                   <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
-                      {!e.isEnrolled && (
-                        <>
-                          <button
-                            onClick={() => navigate(`/portal/members/${e.employee_id}/enroll`)}
-                            className="text-xs text-interactive hover:underline font-medium"
-                          >
-                            Enroll
-                          </button>
-                          <span className="text-gray-300">|</span>
-                          <button
-                            onClick={() => alert(`Enrollment reminder sent to ${e.email} (UI only).`)}
-                            className="text-xs text-gray-500 hover:text-gray-700 hover:underline"
-                          >
-                            Send Reminder
-                          </button>
-                        </>
-                      )}
-                      {e.isEnrolled && (
-                        <button
-                          onClick={() => navigate(`/portal/members/${e.employee_id}`)}
-                          className="text-xs text-gray-500 hover:text-gray-700 hover:underline"
-                        >
-                          View Profile
+                    <Menu.Root>
+                      <Menu.Trigger asChild>
+                        <button className="p-1 rounded hover:bg-gray-100 focus:outline-none" aria-label="Row actions">
+                          <MoreVertIcon fontSize="small" className="text-gray-400" />
                         </button>
-                      )}
-                    </div>
+                      </Menu.Trigger>
+                      <Menu.Positioner>
+                        <Menu.Content className="bg-white border border-gray-200 rounded shadow-lg z-50 py-1 min-w-36">
+                          <Menu.Item
+                            value="view"
+                            className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50 outline-none"
+                            onClick={() => navigate(`/portal/members/${e.employee_id}?from=enrollment`)}
+                          >
+                            View Profile
+                          </Menu.Item>
+                          {!e.isEnrolled && (
+                            <>
+                              <Menu.Item
+                                value="enroll"
+                                className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50 outline-none"
+                                onClick={() => navigate(`/portal/members/${e.employee_id}/enroll?from=enrollment`)}
+                              >
+                                Enroll
+                              </Menu.Item>
+                              <Menu.Item
+                                value="remind"
+                                className="px-4 py-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-50 outline-none"
+                                onClick={() => alert(`Enrollment reminder sent to ${e.email} (UI only).`)}
+                              >
+                                Send Reminder
+                              </Menu.Item>
+                            </>
+                          )}
+                        </Menu.Content>
+                      </Menu.Positioner>
+                    </Menu.Root>
                   </td>
                 </tr>
               ))}
@@ -359,7 +370,7 @@ function EoiTab({ sponsorId }) {
             placeholder="Search employee or benefit…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 w-64"
+            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 bg-white w-64"
           />
         </div>
         <div className="flex gap-1.5 flex-wrap">

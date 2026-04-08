@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { Tabs } from '@ark-ui/react/tabs'
 import { Accordion } from '@ark-ui/react/accordion'
@@ -154,7 +154,7 @@ function CollapsibleTableGroup({ label, count, columns, rows, emptyMessage }) {
             <p className="px-5 py-4 text-sm text-gray-400">{emptyMessage}</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="border-b border-gray-200">
                 <tr>
                   {columns.map((col) => (
                     <th
@@ -531,6 +531,9 @@ const ALL_TABS = [
 export default function EmployeeDetailPage() {
   const { employeeId } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const backTo = searchParams.get('from') === 'enrollment' ? '/portal/enrollment' : '/portal/members'
+  const backLabel = searchParams.get('from') === 'enrollment' ? 'Back to Enrollment' : 'Back to Members'
   const { personaKey } = usePersona()
 
   const [emp, setEmp] = useState(null)
@@ -606,10 +609,10 @@ export default function EmployeeDetailPage() {
         <Button
           variant="text"
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/portal/members')}
+          onClick={() => navigate(backTo)}
           sx={{ mb: 1, pl: 0 }}
         >
-          Back to Members
+          {backLabel}
         </Button>
       )}
 

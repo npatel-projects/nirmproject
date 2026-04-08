@@ -66,8 +66,8 @@ function RequestTable({ rows, navigate }) {
       <p className="text-sm text-gray-500 mb-4">Click on a request number to see more details</p>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
+          <thead className="border-b border-gray-200">
+            <tr>
               {['Request #', 'Type', 'Member', 'Submitted', 'Status'].map((h) => (
                 <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                   {h}

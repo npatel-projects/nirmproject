@@ -260,7 +260,7 @@ function EditMemberModal({ emp, groups, onConfirm, onCancel, saving, saveError }
   const [errors, setErrors] = useState({})
 
   const inputClass = (f) =>
-    `w-full px-3 py-2 text-sm border rounded focus:outline-none transition-colors ${
+    `w-full px-3 py-2 text-sm border rounded focus:outline-none bg-white transition-colors ${
       errors[f] ? 'border-red-400' : 'border-gray-300 focus:border-gray-500'
     }`
 
@@ -395,7 +395,7 @@ function ChangeStatusModal({ emp, onConfirm, onCancel, saving, saveError }) {
   const [errors, setErrors]         = useState({})
 
   const inputClass = (f) =>
-    `w-full px-3 py-2 text-sm border rounded focus:outline-none transition-colors ${
+    `w-full px-3 py-2 text-sm border rounded focus:outline-none bg-white transition-colors ${
       errors[f] ? 'border-red-400' : 'border-gray-300 focus:border-gray-500'
     }`
 
@@ -832,7 +832,7 @@ function AddIndividualForm({ plans, onSuccess, sponsorId }) {
   const [saved, setSaved]     = useState(false)
 
   const inputClass = (name) =>
-    `w-full px-3 py-2 text-sm border rounded focus:outline-none focus:border-gray-500 transition-colors ${
+    `w-full px-3 py-2 text-sm border rounded focus:outline-none focus:border-gray-500 bg-white transition-colors ${
       fieldErrors[name] ? 'border-red-400' : 'border-gray-300'
     }`
   const labelClass = 'block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1'
@@ -1372,7 +1372,7 @@ export default function MembersPage() {
             placeholder="Search by name or ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400"
+            className="w-full pl-4 pr-10 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 bg-white"
           />
           <SearchIcon
             fontSize="small"
@@ -1422,23 +1422,23 @@ export default function MembersPage() {
           {/* Members table */}
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
             <table className="w-full text-sm">
-              <thead className="border-b border-gray-200 bg-gray-50">
+              <thead className="border-b border-gray-200">
                 <tr>
                   <th className="w-10 px-3 py-3" aria-label="Expand" />
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Employee ID
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">Name</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Member ID
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Eligibility
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Enrollment Status
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>

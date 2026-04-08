@@ -93,7 +93,7 @@ export default function PlansPage() {
             placeholder="Search"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 w-56"
+            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-gray-400 bg-white w-56"
           />
         </div>
 
@@ -116,22 +116,22 @@ export default function PlansPage() {
             <table className="w-full text-sm">
               <thead className="border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer select-none">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer select-none">
                     <span className="flex items-center gap-1">
                       Plan Name <UnfoldMoreIcon fontSize="small" className="text-gray-400" />
                     </span>
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer select-none">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer select-none">
                     <span className="flex items-center gap-1">
                       Contract <UnfoldMoreIcon fontSize="small" className="text-gray-400" />
                     </span>
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer select-none">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer select-none">
                     <span className="flex items-center gap-1">
                       Plan Type <UnfoldMoreIcon fontSize="small" className="text-gray-400" />
                     </span>
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody>

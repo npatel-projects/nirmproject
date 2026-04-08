@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePersona } from '../../context/PersonaContext'
 import { Button, Chip } from '@mui/material'
@@ -191,6 +191,9 @@ function PasResultState({ emp, result, onBack }) {
 export default function EnrollmentPage() {
   const { employeeId } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const backTo = searchParams.get('from') === 'enrollment' ? '/portal/enrollment' : `/portal/members/${employeeId}`
+  const backLabel = searchParams.get('from') === 'enrollment' ? 'Back to Enrollment' : 'Back to Employee'
   const { sponsorId } = usePersona()
 
   const [emp, setEmp]           = useState(null)
@@ -379,10 +382,10 @@ export default function EnrollmentPage() {
       <Button
         variant="text"
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(`/portal/members/${employeeId}`)}
+        onClick={() => navigate(backTo)}
         sx={{ mb: 1, pl: 0 }}
       >
-        Back to Employee
+        {backLabel}
       </Button>
 
       {/* Employee header */}
