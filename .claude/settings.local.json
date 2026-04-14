@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(grep -n \"className={inputClass\" \"c:\\\\Users\\\\NPatel2\\\\OneDrive - Equisoft\\\\Nirm's Project\\\\src\\\\pages\\\\portal\"/*.jsx)",
-      "Bash(grep -n \"function inputClass\\\\|const inputClass\" \"c:\\\\Users\\\\NPatel2\\\\OneDrive - Equisoft\\\\Nirm's Project\\\\src\\\\pages\\\\portal\"/*.jsx)"
+      "Bash(grep -n \"function inputClass\\\\|const inputClass\" \"c:\\\\Users\\\\NPatel2\\\\OneDrive - Equisoft\\\\Nirm's Project\\\\src\\\\pages\\\\portal\"/*.jsx)",
+      "Bash(npm show:*)",
+      "Bash(npx bmad-method@latest)"
     ]
   }
 }
